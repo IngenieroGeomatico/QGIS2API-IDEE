@@ -23,14 +23,14 @@ El código exportado se encuentra sin minimizar para permitir una edición poste
 
 ### URL del proyecto API-CNIG
 
-- Página oficial del proyecto: [https://plataforma.idee.es/cnig-api](https://plataforma.idee.es/cnig-api)
+- Página oficial del proyecto: [https://plataforma.idee.es/idee-api](https://plataforma.idee.es/idee-api)
 
-- API-DOC: [https://componentes.cnig.es/api-core/doc/](https://componentes.cnig.es/api-core/doc/)
+- API-DOC: [https://componentes.idee.es/api-idee/doc/](https://componentes.idee.es/api-idee/doc/)
 
-- Repositorio del código: [https://github.com/IGN-CNIG/API-CNIG](https://github.com/IGN-CNIG/API-CNIG)
+- Repositorio del código: [https://github.com/Desarrollos-IDEE/API-IDEE](https://github.com/Desarrollos-IDEE/API-IDEE)
 
-- Complementos o extensiones: [https://componentes.cnig.es/api-core/test.html](https://componentes.cnig.es/api-core/test.html)
+- Complementos o extensiones: [https://componentes.idee.es/api-idee/test.html](https://componentes.idee.es/api-idee/test.html)
 
-- Documentación en formato WIKI: [https://github.com/IGN-CNIG/API-CNIG/wiki](https://github.com/IGN-CNIG/API-CNIG/wiki)
+- Documentación en formato WIKI: [https://github.com/Desarrollos-IDEE/API-IDEE/wiki](https://github.com/Desarrollos-IDEE/API-IDEE/wiki)
 
-- Ejemplos de uso: [https://componentes.cnig.es/GaleriaEjemplos_apiidee/](https://componentes.cnig.es/GaleriaEjemplos_apiidee/)
+- Ejemplos de uso: [https://componentes.idee.es/GaleriaEjemplos_API-IDEE](https://componentes.idee.es/GaleriaEjemplos_API-IDEE)
