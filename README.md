@@ -21,7 +21,7 @@ El código exportado se encuentra sin minimizar para permitir una edición poste
 2. Personalizar el visualizador con una serie de controles del mapa
 3. Seleccionar una carpeta de exportación del visualizador y los datos utilizados.
 
-### URL del proyecto API-CNIG
+### URL del proyecto API-IDEE
 
 - Página oficial del proyecto: [https://plataforma.idee.es/idee-api](https://plataforma.idee.es/idee-api)
 
