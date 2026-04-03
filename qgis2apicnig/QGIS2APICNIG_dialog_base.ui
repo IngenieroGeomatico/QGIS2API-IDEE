@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>QGIS2APICNIGDialogBase</class>
- <widget class="QDialog" name="QGIS2APICNIGDialogBase">
+ <class>QGIS2apiideeDialogBase</class>
+ <widget class="QDialog" name="QGIS2apiideeDialogBase">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>
@@ -217,7 +217,7 @@
            <item row="1" column="0">
             <widget class="QgsCollapsibleGroupBox" name="mGroupBox_3">
              <property name="title">
-              <string>extensiones propias de QGIS2APICNIG</string>
+              <string>extensiones propias de QGIS2apiidee</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_2">
               <item row="0" column="0">
@@ -532,7 +532,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#cccccc;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;1. La primera forma de instalar este complemento es directamente desde QGIS  (complementos -&amp;gt; administrar e instalar complementos). Si se realiza mediante este punto, es importante habilitar los complementos experimentales para poder utilizarlo (complementos -&amp;gt; administrar e instalar complementos´-&amp;gt; configuración -&amp;gt; habilitar también los complementos experimentales)&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;2. Desde el respotorio oficial de complementos (&lt;/span&gt;&lt;a href=&quot;https://plugins.qgis.org/plugins/qgis2apicnig/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://plugins.qgis.org/plugins/qgis2apicnig/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;). Se descargaría el zip y se importaría desde complementos -&amp;gt; administrar e instalar complementos -&amp;gt; instalar a partir de zip.&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;2. Desde el respotorio oficial de complementos (&lt;/span&gt;&lt;a href=&quot;https://plugins.qgis.org/plugins/qgis2apiidee/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://plugins.qgis.org/plugins/qgis2apiidee/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;). Se descargaría el zip y se importaría desde complementos -&amp;gt; administrar e instalar complementos -&amp;gt; instalar a partir de zip.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;3. Desde este repositorio, en la parte de despliegues (releases):  (&lt;/span&gt;&lt;a href=&quot;https://github.com/IngenieroGeomatico/QGIS2API-IDEE/releases&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/IngenieroGeomatico/QGIS2API-IDEE/releases&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;). Una vez descargado, se instalaría en QGIS desde complementos -&amp;gt; administrar e instalar complementos -&amp;gt; instalar a partir de zip.&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#cccccc;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;
@@ -554,7 +554,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;- Documentación en formato WIKI:(&lt;/span&gt;&lt;a href=&quot;https://github.com/IGN-CNIG/API-CNIG/wiki&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/IGN-CNIG/API-CNIG/wiki&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;- Ejemplos de uso: (&lt;/span&gt;&lt;a href=&quot;https://componentes.cnig.es/GaleriaEjemplos_APICNIG/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://componentes.cnig.es/GaleriaEjemplos_APICNIG/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;- Ejemplos de uso: (&lt;/span&gt;&lt;a href=&quot;https://componentes.cnig.es/GaleriaEjemplos_apiidee/&quot;&gt;&lt;span style=&quot; font-size:8pt; text-decoration: underline; color:#0000ff;&quot;&gt;https://componentes.cnig.es/GaleriaEjemplos_apiidee/&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#000000;&quot;&gt;)&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Consolas','Courier New','monospace'; font-size:8pt; color:#cccccc;&quot;&gt;&lt;br /&gt;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
@@ -578,7 +578,7 @@ p, li { white-space: pre-wrap; }
   <connection>
    <sender>toolButtonSelectFolder</sender>
    <signal>clicked()</signal>
-   <receiver>QGIS2APICNIGDialogBase</receiver>
+   <receiver>QGIS2apiideeDialogBase</receiver>
    <slot>selectFolder()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -594,7 +594,7 @@ p, li { white-space: pre-wrap; }
   <connection>
    <sender>toolButton_ExportMap</sender>
    <signal>clicked()</signal>
-   <receiver>QGIS2APICNIGDialogBase</receiver>
+   <receiver>QGIS2apiideeDialogBase</receiver>
    <slot>exportMap()</slot>
    <hints>
     <hint type="sourcelabel">

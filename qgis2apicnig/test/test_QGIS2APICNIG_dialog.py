@@ -16,18 +16,18 @@ import unittest
 
 from qgis.PyQt.QtGui import QDialogButtonBox, QDialog
 
-from QGIS2APICNIG_dialog import QGIS2APICNIGDialog
+from QGIS2apiidee_dialog import QGIS2apiideeDialog
 
 from utilities import get_qgis_app
 QGIS_APP = get_qgis_app()
 
 
-class QGIS2APICNIGDialogTest(unittest.TestCase):
+class QGIS2apiideeDialogTest(unittest.TestCase):
     """Test dialog works."""
 
     def setUp(self):
         """Runs before each test."""
-        self.dialog = QGIS2APICNIGDialog(None)
+        self.dialog = QGIS2apiideeDialog(None)
 
     def tearDown(self):
         """Runs after each test."""
@@ -49,7 +49,7 @@ class QGIS2APICNIGDialogTest(unittest.TestCase):
         self.assertEqual(result, QDialog.Rejected)
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(QGIS2APICNIGDialogTest)
+    suite = unittest.makeSuite(QGIS2apiideeDialogTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# QGIS2APICNIG documentation build configuration file, created by
+# QGIS2apiidee documentation build configuration file, created by
 # sphinx-quickstart on Sun Feb 12 17:11:03 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'QGIS2APICNIG'
+project = u'QGIS2apiidee'
 copyright = u'2013, IngenieroGeomatico'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -178,7 +178,7 @@ htmlhelp_basename = 'TemplateClassdoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'QGIS2APICNIG.tex', u'QGIS2APICNIG Documentation',
+  ('index', 'QGIS2apiidee.tex', u'QGIS2apiidee Documentation',
    u'IngenieroGeomatico', 'manual'),
 ]
 
@@ -211,6 +211,6 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'TemplateClass', u'QGIS2APICNIG Documentation',
+    ('index', 'TemplateClass', u'QGIS2apiidee Documentation',
      [u'IngenieroGeomatico'], 1)
 ]

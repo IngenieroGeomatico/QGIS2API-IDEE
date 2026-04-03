@@ -447,7 +447,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         """
 
 
-    def QGISStyle2APICNIGStyle(self, qgisLayerLegend):
+    def QGISStyle2apiideeStyle(self, qgisLayerLegend):
 
         qgisLayer= QgsProject.instance().mapLayersByName(qgisLayerLegend)[0]
 
@@ -458,7 +458,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         except Exception as e:
             legendClassificationAttribute = "- - -"
 
-        # Una capa puede tener más de une stilo, por lo que cuando en apicnig se permita un array de estilos, 
+        # Una capa puede tener más de une stilo, por lo que cuando en apiidee se permita un array de estilos, 
         # se podrá añadir cada estilo de qgis como un array desde un bucle.
         # De momento se coge el elemento 0
         
@@ -516,7 +516,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
             else:
                 strokeWidth = float(2)
 
-            APICNIGStyle = '''new IDEE.style.Generic({{
+            apiideeStyle = '''new IDEE.style.Generic({{
                                             point: {{
                                                 fill: {{
                                                     color: '{fillColorRGB}',
@@ -676,7 +676,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                 else:
                     continue
            
-            APICNIGStyle = '''new IDEE.style.Generic({{
+            apiideeStyle = '''new IDEE.style.Generic({{
                                         {point},
                                         {polygon},
                                         {line}
@@ -691,7 +691,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
 
         elif typeStyle == 'categorizedSymbol':
             print('/////////////')
-            APICNIGStyleCategoric = ""
+            apiideeStyleCategoric = ""
             categoricList = {}
             i = 0
             for categoria in qgisLayer.renderer().categories():
@@ -736,7 +736,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                 
 
                 categoricList[valueAtribute] = "__{}_{}__".format(legendClassificationAttribute,i)
-                APICNIGStyle_category = ''' 
+                apiideeStyle_category = ''' 
                                         var {legendClassificationAttribute}_{i} = new IDEE.style.Generic({{
                                             point: {{
                                                 fill: {{
@@ -781,11 +781,11 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                                                 strokeWidth =strokeWidth,
                                         )
 
-                APICNIGStyleCategoric += APICNIGStyle_category
+                apiideeStyleCategoric += apiideeStyle_category
 
-            APICNIGStyle = """new IDEE.style.Category("{name}", {list})""".format(name=legendClassificationAttribute, list=categoricList)
-            APICNIGStyle = APICNIGStyle.replace("'__","").replace("__'","")
-            APICNIGStyle = [APICNIGStyle, APICNIGStyleCategoric]
+            apiideeStyle = """new IDEE.style.Category("{name}", {list})""".format(name=legendClassificationAttribute, list=categoricList)
+            apiideeStyle = apiideeStyle.replace("'__","").replace("__'","")
+            apiideeStyle = [apiideeStyle, apiideeStyleCategoric]
             returnStyleDefault = False
             print('/////////////')
 
@@ -793,7 +793,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
             returnStyleDefault = True
 
         if returnStyleDefault:
-            APICNIGStyle = '''new IDEE.style.Generic({{
+            apiideeStyle = '''new IDEE.style.Generic({{
                                 point: {{
                                     fill: {{
                                         color: '{fillColorRGB}',
@@ -836,7 +836,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                             )
         
 
-        return APICNIGStyle
+        return apiideeStyle
 
     def CreateHTML(self, headerImports, checkBox_ComparacionMapas):
 

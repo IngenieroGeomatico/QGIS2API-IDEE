@@ -1,7 +1,7 @@
 Plugin Builder Results
 
-Your plugin QGIS2APICNIG was created in:
-    C:/Users/aurelio.aragon/OneDrive - MITMA/Escritorio/Proyectos/2024/1_QGIS2APICNIG\qgis2apicnig
+Your plugin QGIS2apiidee was created in:
+    C:/Users/aurelio.aragon/OneDrive - MITMA/Escritorio/Proyectos/2024/1_QGIS2apiidee\qgis2apiidee
 
 Your QGIS plugin directory is located at:
     C:/Users/aurelio.aragon/AppData/Roaming/QGIS/QGIS3/profiles/default/python/plugins
@@ -17,11 +17,11 @@ What's Next:
 
   * Test the plugin by enabling it in the QGIS plugin manager
 
-  * Customize it by editing the implementation file: ``QGIS2APICNIG.py``
+  * Customize it by editing the implementation file: ``QGIS2apiidee.py``
 
   * Create your own custom icon, replacing the default icon.png
 
-  * Modify your user interface by opening QGIS2APICNIG_dialog_base.ui in Qt Designer
+  * Modify your user interface by opening QGIS2apiidee_dialog_base.ui in Qt Designer
 
   * You can use the Makefile to compile your Ui and resource files when
     you make changes. This requires GNU make (gmake)

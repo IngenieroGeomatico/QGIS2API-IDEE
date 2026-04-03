@@ -1,5 +1,5 @@
 #/***************************************************************************
-# QGIS2APICNIG
+# QGIS2apiidee
 #
 # Complemento que crea un visualizador cartográfico con el contenido del lieno de QGIS
 #							 -------------------
@@ -38,15 +38,15 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	QGIS2APICNIG.py QGIS2APICNIG_dialog.py
+	QGIS2apiidee.py QGIS2apiidee_dialog.py
 
-PLUGINNAME = QGIS2APICNIG
+PLUGINNAME = QGIS2apiidee
 
 PY_FILES = \
 	__init__.py \
-	QGIS2APICNIG.py QGIS2APICNIG_dialog.py
+	QGIS2apiidee.py QGIS2apiidee_dialog.py
 
-UI_FILES = QGIS2APICNIG_dialog_base.ui
+UI_FILES = QGIS2apiidee_dialog_base.ui
 
 EXTRAS = metadata.txt icon.png
 

@@ -10,7 +10,7 @@ El código exportado se encuentra sin minimizar para permitir una edición poste
 
 1. La primera forma de instalar este complemento es directamente desde QGIS  (complementos -> administrar e instalar complementos). Si se realiza mediante este punto, es importante habilitar los complementos experimentales para poder utilizarlo (complementos -> administrar e instalar complementos´-> configuración -> habilitar también los complementos experimentales)
 
-2. Desde el repositorio oficial de complementos [https://plugins.qgis.org/plugins/qgis2apicnig/](https://plugins.qgis.org/plugins/qgis2apicnig/). Se descargaría el zip y se importaría desde complementos -> administrar e instalar complementos -> instalar a partir de zip.
+2. Desde el repositorio oficial de complementos [https://plugins.qgis.org/plugins/qgis2apiidee/](https://plugins.qgis.org/plugins/qgis2apiidee/). Se descargaría el zip y se importaría desde complementos -> administrar e instalar complementos -> instalar a partir de zip.
 
 
 3. Desde este repositorio, en la parte de despliegues (releases):  [https://github.com/IngenieroGeomatico/QGIS2API-IDEE/releases](https://github.com/IngenieroGeomatico/QGIS2API-IDEE/releases). Una vez descargado, se instalaría en QGIS desde complementos -> administrar e instalar complementos -> instalar a partir de zip.
@@ -33,4 +33,4 @@ El código exportado se encuentra sin minimizar para permitir una edición poste
 
 - Documentación en formato WIKI: [https://github.com/IGN-CNIG/API-CNIG/wiki](https://github.com/IGN-CNIG/API-CNIG/wiki)
 
-- Ejemplos de uso: [https://componentes.cnig.es/GaleriaEjemplos_APICNIG/](https://componentes.cnig.es/GaleriaEjemplos_APICNIG/)
+- Ejemplos de uso: [https://componentes.cnig.es/GaleriaEjemplos_apiidee/](https://componentes.cnig.es/GaleriaEjemplos_apiidee/)

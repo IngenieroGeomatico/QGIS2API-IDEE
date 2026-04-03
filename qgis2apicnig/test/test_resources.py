@@ -18,7 +18,7 @@ from qgis.PyQt.QtGui import QIcon
 
 
 
-class QGIS2APICNIGDialogTest(unittest.TestCase):
+class QGIS2apiideeDialogTest(unittest.TestCase):
     """Test rerources work."""
 
     def setUp(self):
@@ -31,12 +31,12 @@ class QGIS2APICNIGDialogTest(unittest.TestCase):
 
     def test_icon_png(self):
         """Test we can click OK."""
-        path = ':/plugins/QGIS2APICNIG/icon.png'
+        path = ':/plugins/QGIS2apiidee/icon.png'
         icon = QIcon(path)
         self.assertFalse(icon.isNull())
 
 if __name__ == "__main__":
-    suite = unittest.makeSuite(QGIS2APICNIGResourcesTest)
+    suite = unittest.makeSuite(QGIS2apiideeResourcesTest)
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 
