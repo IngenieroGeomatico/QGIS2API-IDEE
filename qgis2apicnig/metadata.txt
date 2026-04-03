@@ -3,7 +3,7 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=QGIS2API-CNIG
+name=QGIS2API-IDEE
 qgisMinimumVersion=3.0
 description=Este plugin ha sido reemplazado por 'QGIS2APIIDEE'. Puedes instalarlo desde el repositorio oficial. Complemento que crea un visualizador cartográfico con el contenido del lienzo de QGIS
 version=0.7.1
@@ -12,8 +12,8 @@ email=aurearagon@gmail.com
 
 about=Este complemento exporta un visualizador cartográfico API-CNIG a partir de los datos cargados en el mapa. 
 
-tracker=https://github.com/IngenieroGeomatico/QGIS2API-CNIG
-repository=https://github.com/IngenieroGeomatico/QGIS2API-CNIG
+tracker=https://github.com/IngenieroGeomatico/QGIS2API-IDEE
+repository=https://github.com/IngenieroGeomatico/QGIS2API-IDEE
 # End of mandatory metadata
 
 # Recommended items:
@@ -25,7 +25,7 @@ hasProcessingProvider=no
 # Tags are comma separated with spaces allowed
 tags=python, API-CNIG, visualizador, OpenLayers
 
-homepage=https://github.com/IngenieroGeomatico/QGIS2API-CNIG
+homepage=https://github.com/IngenieroGeomatico/QGIS2API-IDEE
 category=Web
 icon=icon.png
 # experimental flag

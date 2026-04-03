@@ -1,4 +1,4 @@
-# QGIS2API-CNIG
+# QGIS2API-IDEE
 
 Complemento para QGIS que mejora la experiencia de usuario a la hora de crear visualizadores con API-CNIG.
 
@@ -13,7 +13,7 @@ El código exportado se encuentra sin minimizar para permitir una edición poste
 2. Desde el repositorio oficial de complementos [https://plugins.qgis.org/plugins/qgis2apicnig/](https://plugins.qgis.org/plugins/qgis2apicnig/). Se descargaría el zip y se importaría desde complementos -> administrar e instalar complementos -> instalar a partir de zip.
 
 
-3. Desde este repositorio, en la parte de despliegues (releases):  [https://github.com/IngenieroGeomatico/QGIS2API-CNIG/releases](https://github.com/IngenieroGeomatico/QGIS2API-CNIG/releases). Una vez descargado, se instalaría en QGIS desde complementos -> administrar e instalar complementos -> instalar a partir de zip.
+3. Desde este repositorio, en la parte de despliegues (releases):  [https://github.com/IngenieroGeomatico/QGIS2API-IDEE/releases](https://github.com/IngenieroGeomatico/QGIS2API-IDEE/releases). Una vez descargado, se instalaría en QGIS desde complementos -> administrar e instalar complementos -> instalar a partir de zip.
 
 ### ¿Qué permite hacer este complemento?
 

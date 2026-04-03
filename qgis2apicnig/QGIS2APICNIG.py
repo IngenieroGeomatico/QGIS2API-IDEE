@@ -69,7 +69,7 @@ class QGIS2APICNIG:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&QGIS2API-CNIG')
+        self.menu = self.tr(u'&QGIS2API-IDEE')
 
         # Check if plugin was started the first time in current QGIS session
         # Must be set in initGui() to survive plugin reloads
@@ -184,7 +184,7 @@ class QGIS2APICNIG:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginWebMenu(
-                self.tr(u'&QGIS2API-CNIG'),
+                self.tr(u'&QGIS2API-IDEE'),
                 action)
             self.iface.removeToolBarIcon(action)
 
