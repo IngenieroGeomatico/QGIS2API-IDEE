@@ -3,6 +3,434 @@ import urllib.parse
 from qgis.core import QgsVectorFileWriter, QgsCoordinateReferenceSystem, QgsMessageLog
 from qgis.core import QgsMapLayer
 from qgis.utils import Qgis
+from qgis.core import QgsProject
+from PyQt5 import QtCore
+
+
+def remove_spaces(txt):
+    return '"'.join(it if i % 2 else ''.join(it.split())
+                    for i, it in enumerate(txt.split('"')))
+
+
+def to_local_geojson(layer, layerGJSON, apiideeStyle):
+    # Recreates the JS loader used to load a local GeoJSON variable and add it to the map
+    name = layer['nameLegend'].replace(" ", "").replace("—", "_")
+    sourceFolder = layer['sourceFolder']
+    file = f"{name}.js"
+    visible = str(layer['visible']).lower()
+    zindex = layer['zIndex']
+
+    if type(apiideeStyle) != list:
+        return f"""
+                var js_{name} = document.createElement("script");
+                js_{name}.type = "text/javascript";
+                js_{name}.async = false;
+                js_{name}.src = ".{sourceFolder}/{file}";
+                document.head.appendChild(js_{name});
+                js_{name}.addEventListener('load', () => {{
+
+                    mapajs.addLayers(
+                        new M.layer.GeoJSON({{
+                                source: {name}, 
+                                name: '{name}',
+                                legend: "{name}",
+                                extract: true,
+                            }}, {{
+                            // aplica un estilo a la capa
+                                style: {apiideeStyle},
+                                visibility: {visible} // capa no visible en el mapa
+                            }}, {{
+                                opacity: 1 // aplica opacidad a la capa
+                            }})
+                    );
+
+                    mapajs.getLayers().filter( (layer) => layer.legend == "{name}" )[0].setZIndex({zindex})
+
+                }});
+                """ 
+    else:
+        stylesList = apiideeStyle[1]
+        apiideeStyle0 = apiideeStyle[0]
+        return f"""
+                var js_{name} = document.createElement("script");
+                js_{name}.type = "text/javascript";
+                js_{name}.async = false;
+                js_{name}.src = ".{sourceFolder}/{file}";
+                document.head.appendChild(js_{name});
+                js_{name}.addEventListener('load', () => {{
+
+                    {stylesList}
+
+                    mapajs.addLayers(
+                        new M.layer.GeoJSON({{
+                                source: {name}, 
+                                name: '{name}',
+                                legend: "{name}",
+                                extract: true,
+                            }}, {{
+                            // aplica un estilo a la capa
+                                style: {apiideeStyle0},
+                                visibility: {visible} // capa no visible en el mapa
+                            }}, {{
+                                opacity: 1 // aplica opacidad a la capa
+                            }})
+                    );
+
+                    mapajs.getLayers().filter( (layer) => layer.legend == "{name}" )[0].setZIndex({zindex})
+
+                }});
+                """
+
+
+def QGISStyle2apiideeStyle(qgisLayerLegend):
+    # Port of the style conversion logic from the dialog into utilidades
+    qgisLayer = QgsProject.instance().mapLayersByName(qgisLayerLegend)[0]
+
+    typeStyle = qgisLayer.renderer().type()
+
+    try:
+        legendClassificationAttribute = qgisLayer.renderer().legendClassificationAttribute()
+    except Exception:
+        legendClassificationAttribute = "- - -"
+
+    try:
+        propertiesStyle = qgisLayer.renderer().symbol().symbolLayer(0).properties()
+    except Exception:
+        propertiesStyle = "- - -"
+
+    try:
+        CategorizedSymbolStyle = qgisLayer.renderer().symbol().symbolLayer(0).properties()
+    except Exception:
+        CategorizedSymbolStyle = "- - -"
+
+    returnStyleDefault = True
+
+    if typeStyle == 'singleSymbol':
+        if 'color' in propertiesStyle:
+            fillColorRGBA_list = propertiesStyle['color'].split(',')
+        else:
+            fillColorRGBA_list = [255, 153, 0, 255/2]
+
+        fillColorRGB = 'rgb({r}, {g}, {b})'.format(
+            r=int(fillColorRGBA_list[0]),
+            g=int(fillColorRGBA_list[1]),
+            b=int(fillColorRGBA_list[2]),
+        )
+        fillOpacity = int(fillColorRGBA_list[3]) / 255
+
+        if 'outline_color' in propertiesStyle:
+            strokeColorRGBA_list = propertiesStyle['outline_color'].split(',')
+        else:
+            strokeColorRGBA_list = [255, 102, 0, 255]
+
+        strokeColorRGB = 'rgb({r}, {g}, {b})'.format(
+            r=int(strokeColorRGBA_list[0]),
+            g=int(strokeColorRGBA_list[1]),
+            b=int(strokeColorRGBA_list[2]),
+        )
+        strokeOpacity = int(strokeColorRGBA_list[3]) / 255
+
+        if 'outline_color' in propertiesStyle and 'outline_width' in propertiesStyle:
+            strokeWidth = float(propertiesStyle['outline_width'])
+        else:
+            strokeWidth = float(2)
+
+        apiideeStyle = '''new M.style.Generic({{
+                                            point: {{
+                                                fill: {{
+                                                    color: '{fillColorRGB}',
+                                                    opacity: {fillOpacity},
+                                                }},
+                                                stroke: {{
+                                                    color: '{strokeColorRGB}',
+                                                    opacity: {strokeOpacity},
+                                                    width: {strokeWidth}, 
+                                                }}
+                                            }},
+                                            polygon: {{
+                                                fill: {{
+                                                    color: '{fillColorRGB}',
+                                                    opacity: {fillOpacity},
+                                                }},
+                                                stroke: {{
+                                                    color: '{strokeColorRGB}',
+                                                    opacity: {strokeOpacity},
+                                                    width: {strokeWidth}, 
+                                                }}
+                                            }},
+                                            line: {{
+                                                fill: {{
+                                                    color: '{fillColorRGB}',
+                                                    opacity: {fillOpacity},
+                                                }},
+                                                stroke: {{
+                                                    color: '{strokeColorRGB}',
+                                                    opacity: {strokeOpacity},
+                                                    width: {strokeWidth}, 
+                                                }}
+                                            }}
+                                        }})'''.format(
+                                                fillColorRGB=fillColorRGB,
+                                                fillOpacity=fillOpacity,
+                                                strokeColorRGB=strokeColorRGB,
+                                                strokeOpacity=strokeOpacity,
+                                                strokeWidth=strokeWidth,
+                                        )
+        returnStyleDefault = False
+
+    elif typeStyle == 'basic':
+        lineStyle = 'line:{}'
+        polygonStyle = 'polygon:{}'
+        pointStyle = 'point:{}'
+        for style in qgisLayer.renderer().styles():
+            propertiesStyle = style.symbol().symbolLayer(0).properties()
+
+            if 'color' in propertiesStyle:
+                fillColorRGBA_list = propertiesStyle['color'].split(',')
+            else:
+                fillColorRGBA_list = [255, 153, 0, 255/2]
+
+            fillColorRGB = 'rgb({r}, {g}, {b})'.format(
+                r=int(fillColorRGBA_list[0]),
+                g=int(fillColorRGBA_list[1]),
+                b=int(fillColorRGBA_list[2]),
+            )
+            fillOpacity = int(fillColorRGBA_list[3]) / 255
+
+            if 'outline_color' in propertiesStyle:
+                strokeColorRGBA_list = propertiesStyle['outline_color'].split(',')
+            else:
+                strokeColorRGBA_list = [255, 102, 0, 255]
+
+            strokeColorRGB = 'rgb({r}, {g}, {b})'.format(
+                r=int(strokeColorRGBA_list[0]),
+                g=int(strokeColorRGBA_list[1]),
+                b=int(strokeColorRGBA_list[2]),
+            )
+            strokeOpacity = int(strokeColorRGBA_list[3]) / 255
+
+            if 'outline_color' in propertiesStyle and 'outline_width' in propertiesStyle:
+                strokeWidth = float(propertiesStyle['outline_width'])
+            else:
+                strokeWidth = float(2)
+
+            if str(style.symbol().type()) == 'SymbolType.Fill':
+                polygonStyle = '''
+                    polygon: {{
+                                fill: {{
+                                    color: '{fillColorRGB}',
+                                    opacity: {fillOpacity},
+                                }},
+                                stroke: {{
+                                    color: '{strokeColorRGB}',
+                                    opacity: {strokeOpacity},
+                                    width: {strokeWidth}, 
+                                }}
+                            }}
+                '''.format(
+                                fillColorRGB=fillColorRGB,
+                                fillOpacity=fillOpacity,
+                                strokeColorRGB=strokeColorRGB,
+                                strokeOpacity=strokeOpacity,
+                                strokeWidth=strokeWidth,
+                        )
+                returnStyleDefault = False
+
+            elif str(style.symbol().type()) == 'SymbolType.Line':
+                lineStyle = '''
+                    line: {{
+                                fill: {{
+                                    color: '{fillColorRGB}',
+                                    opacity: {fillOpacity},
+                                }},
+                                stroke: {{
+                                    color: '{strokeColorRGB}',
+                                    opacity: {strokeOpacity},
+                                    width: {strokeWidth}, 
+                                }}
+                            }}
+                '''.format(
+                                fillColorRGB=fillColorRGB,
+                                fillOpacity=fillOpacity,
+                                strokeColorRGB=strokeColorRGB,
+                                strokeOpacity=strokeOpacity,
+                                strokeWidth=strokeWidth,
+                        )
+                returnStyleDefault = False
+
+            elif str(style.symbol().type()) == 'SymbolType.Marker':
+                pointStyle = '''
+                    point: {{
+                                fill: {{
+                                    color: '{fillColorRGB}',
+                                    opacity: {fillOpacity},
+                                }},
+                                stroke: {{
+                                    color: '{strokeColorRGB}',
+                                    opacity: {strokeOpacity},
+                                    width: {strokeWidth}, 
+                                }}
+                            }}
+                '''.format(
+                                fillColorRGB=fillColorRGB,
+                                fillOpacity=fillOpacity,
+                                strokeColorRGB=strokeColorRGB,
+                                strokeOpacity=strokeOpacity,
+                                strokeWidth=strokeWidth,
+                        )
+                returnStyleDefault = False
+            else:
+                continue
+
+        apiideeStyle = '''new M.style.Generic({{
+                                    {point},
+                                    {polygon},
+                                    {line}
+                        }})'''.format(
+                                point=pointStyle,
+                                polygon=polygonStyle,
+                                line=lineStyle
+                        )
+
+    elif typeStyle == 'categorizedSymbol':
+        apiideeStyleCategoric = ""
+        categoricList = {}
+        i = 0
+        for categoria in qgisLayer.renderer().categories():
+            i += 1
+            valueAtribute = categoria.value()
+            propertiesStyle = categoria.symbol().symbolLayer(0).properties()
+
+            if 'color' in propertiesStyle:
+                fillColorRGBA_list = propertiesStyle['color'].split(',')
+            elif 'line_color' in propertiesStyle:
+                fillColorRGBA_list = propertiesStyle['line_color'].split(',')
+            else:
+                fillColorRGBA_list = [255, 153, 0, 255/2]
+
+            fillColorRGB = 'rgb({r}, {g}, {b})'.format(
+                r=int(fillColorRGBA_list[0]),
+                g=int(fillColorRGBA_list[1]),
+                b=int(fillColorRGBA_list[2]),
+            )
+            fillOpacity = int(fillColorRGBA_list[3]) / 255
+
+            if 'outline_color' in propertiesStyle:
+                strokeColorRGBA_list = propertiesStyle['outline_color'].split(',')
+            elif 'line_color' in propertiesStyle:
+                strokeColorRGBA_list = propertiesStyle['line_color'].split(',')
+            else:
+                strokeColorRGBA_list = [255, 102, 0, 255]
+
+            strokeColorRGB = 'rgb({r}, {g}, {b})'.format(
+                r=int(strokeColorRGBA_list[0]),
+                g=int(strokeColorRGBA_list[1]),
+                b=int(strokeColorRGBA_list[2]),
+            )
+            strokeOpacity = int(strokeColorRGBA_list[3]) / 255
+
+            if 'outline_color' in propertiesStyle and 'outline_width' in propertiesStyle:
+                strokeWidth = float(propertiesStyle['outline_width'])
+            else:
+                strokeWidth = float(2)
+
+            categoricList[valueAtribute] = "__{}_{}__".format(legendClassificationAttribute, i)
+            apiideeStyle_category = ''' 
+                                    var {legendClassificationAttribute}_{i} = new M.style.Generic({{
+                                        point: {{
+                                            fill: {{
+                                                color: '{fillColorRGB}',
+                                                opacity: {fillOpacity},
+                                            }},
+                                            stroke: {{
+                                                color: '{strokeColorRGB}',
+                                                opacity: {strokeOpacity},
+                                                width: {strokeWidth}, 
+                                            }}
+                                        }},
+                                        polygon: {{
+                                            fill: {{
+                                                color: '{fillColorRGB}',
+                                                opacity: {fillOpacity},
+                                            }},
+                                            stroke: {{
+                                                color: '{strokeColorRGB}',
+                                                opacity: {strokeOpacity},
+                                                width: {strokeWidth}, 
+                                            }}
+                                        }},
+                                        line: {{
+                                            fill: {{
+                                                color: '{fillColorRGB}',
+                                                opacity: {fillOpacity},
+                                            }},
+                                            stroke: {{
+                                                color: '{strokeColorRGB}',
+                                                opacity: {strokeOpacity},
+                                                width: {strokeWidth}, 
+                                            }}
+                                        }}
+                                    }}) \n'''.format(
+                                            legendClassificationAttribute=legendClassificationAttribute,
+                                            i=i,
+                                            fillColorRGB=fillColorRGB,
+                                            fillOpacity=fillOpacity,
+                                            strokeColorRGB=strokeColorRGB,
+                                            strokeOpacity=strokeOpacity,
+                                            strokeWidth=strokeWidth,
+                                    )
+
+            apiideeStyleCategoric += apiideeStyle_category
+
+        apiideeStyle = """new M.style.Category("{name}", {list})""".format(name=legendClassificationAttribute, list=categoricList)
+        apiideeStyle = apiideeStyle.replace("'__","").replace("__'","")
+        apiideeStyle = [apiideeStyle, apiideeStyleCategoric]
+        returnStyleDefault = False
+
+    if returnStyleDefault:
+        apiideeStyle = '''new M.style.Generic({{
+                            point: {{
+                                fill: {{
+                                    color: '{fillColorRGB}',
+                                    opacity: {fillOpacity},
+                                }},
+                                stroke: {{
+                                    color: '{strokeColorRGB}',
+                                    opacity: {strokeOpacity},
+                                    width: {strokeWidth}, 
+                                }}
+                            }},
+                            polygon: {{
+                                fill: {{
+                                    color: '{fillColorRGB}',
+                                    opacity: {fillOpacity},
+                                }},
+                                stroke: {{
+                                    color: '{strokeColorRGB}',
+                                    opacity: {strokeOpacity},
+                                    width: {strokeWidth}, 
+                                }}
+                            }},
+                            line: {{
+                                fill: {{
+                                    color: '{fillColorRGB}',
+                                    opacity: {fillOpacity},
+                                }},
+                                stroke: {{
+                                    color: '{strokeColorRGB}',
+                                    opacity: {strokeOpacity},
+                                    width: {strokeWidth}, 
+                                }}
+                            }}
+                        }})'''.format(
+                                fillColorRGB='orange',
+                                fillOpacity=0.6,
+                                strokeColorRGB='red',
+                                strokeOpacity=0.8,
+                                strokeWidth=2,
+                        )
+
+    return apiideeStyle
 
 
 def save_vector_layer_as_geojson(layer, export_folder, name):
