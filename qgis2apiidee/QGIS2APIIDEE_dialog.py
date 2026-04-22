@@ -40,6 +40,7 @@ from qgis.gui import QgsMapCanvas
 from qgis.utils import iface, Qgis
 
 from PyQt5 import QtGui, QtWidgets, QtCore
+from .utilidades import layer_templates
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(
     os.path.dirname(__file__), 'QGIS2APIIDEE_dialog_base.ui'))
@@ -54,34 +55,11 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
     # --- Métodos auxiliares ---
 
     def _save_vector_layer_as_geojson(self, layer, export_folder, name):
-        """Guarda una capa vectorial como GeoJSON y devuelve el nombre de variable JS."""
-        path = f"{export_folder}/{name}.js"
-        options = ["COORDINATE_PRECISION=6"]
-        e, err = QgsVectorFileWriter.writeAsVectorFormat(
-            layer, path + '_tmp', "utf-8",
-            QgsCoordinateReferenceSystem("EPSG:4326"),
-            'GeoJson', 0, layerOptions=options
-        )
-        if e == QgsVectorFileWriter.NoError:
-            with open(path, mode="w", encoding="utf8") as f:
-                f.write(f"var {name} = ")
-                with open(path + '_tmp', encoding="utf8") as tmpFile:
-                    for line in tmpFile:
-                        f.write(line.strip("\n\t "))
-            os.remove(path + '_tmp')
-            return name
-        else:
-            QgsMessageLog.logMessage(
-                f"Could not write json file {path}: {err}",
-                "QGIS2APIIDEE", level=Qgis.Critical)
-            return None
+        return layer_templates.save_vector_layer_as_geojson(layer, export_folder, name)
 
     def _get_url_param(self, uri, param, sep='&'):
         """Extrae el valor de un parámetro de una URI."""
-        try:
-            return next(filter(lambda k: f'{param}=' in k, uri.split(sep))).split('=')[1]
-        except StopIteration:
-            return None
+        return layer_templates.get_url_param(uri, param, sep)
 
     def selectFolder(self):
         dialog = QtWidgets.QFileDialog()
@@ -250,201 +228,48 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
     # --- Refactorización de JSONLayer2StringLayer ---
 
     def JSONLayer2StringLayer(self, layer):
-        tipo = layer['layerSourceType']
-        name = layer['nameLegend'].replace(" ", "").replace("—", "_")
-        uri = layer['dataSourceUri']
-
-        if tipo == 'XYZ':
-            url = urllib.parse.unquote(self._get_url_param(uri, 'url'))
-            return self._layer_xyz(url, name, layer)
-        elif tipo == 'TMS':
-            url = urllib.parse.unquote(self._get_url_param(uri, 'url'))
-            return self._layer_tms(url, name, layer)
-        elif tipo == 'GeoTIFF':
-            url = uri.replace("/vsicurl/", "")
-            return self._layer_geotiff(url, name, layer)
-        elif tipo == 'WMTS':
-            return self._layer_wmts(uri, name, layer)
-        elif tipo == 'WMS':
-            return self._layer_wms(uri, name, layer)
-        elif tipo == 'OGC WFS (Web Feature Service)':
-            return self._layer_wfs(uri, name, layer)
-        elif tipo == 'GeoJSON':
-            return self._layer_geojson(layer, name)
-        elif tipo == 'Memory storage':
-            return self._layer_memory(layer, name)
-        elif tipo == 'OGC API - Features':
-            return self._layer_ogc_api_features(uri, name, layer)
-        elif tipo == 'LIBKML':
-            return self._layer_libkml(layer, name)
-        elif tipo == 'MVT':
-            url = self._get_url_param(uri, 'url')
-            return self._layer_mvt(url, name, layer)
-        elif tipo == 'MapLibre':
-            url = self._get_url_param(uri, 'styleUrl')
-            return self._layer_maplibre(url, name, layer)
-        elif layer['QGISlayer'].type() == QgsMapLayer.VectorLayer:
-            return self._layer_vector(layer, name)
-        else:
-            return ''
+        return layer_templates.JSONLayer2StringLayer(layer)
 
     # --- Métodos por tipo de capa ---
 
     def _layer_xyz(self, url, name, layer):
-        return f"""
-            mapajs.addXYZ(
-                new IDEE.layer.XYZ({{
-                    url: '{url}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_xyz(url, name, layer)
 
     def _layer_tms(self, url, name, layer):
-        return f"""
-            mapajs.addTMS(
-                new IDEE.layer.TMS({{
-                    url: '{url}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_tms(url, name, layer)
 
     def _layer_geotiff(self, url, name, layer):
-        return f"""
-            mapajs.addGeoTIFF(
-                new IDEE.layer.GeoTIFF({{
-                    url: '{url}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_geotiff(url, name, layer)
 
     def _layer_wmts(self, uri, name, layer):
-        return f"""
-            mapajs.addWMTS(
-                new IDEE.layer.WMTS({{
-                    url: '{uri}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_wmts(uri, name, layer)
 
     def _layer_wms(self, uri, name, layer):
-        return f"""
-            mapajs.addWMS(
-                new IDEE.layer.WMS({{
-                    url: '{uri}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_wms(uri, name, layer)
 
     def _layer_wfs(self, uri, name, layer):
-        return f"""
-            mapajs.addWFS(
-                new IDEE.layer.WFS({{
-                    url: '{uri}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_wfs(uri, name, layer)
 
     def _layer_geojson(self, layer, name):
-        # Aquí puedes añadir la lógica para exportar la capa como GeoJSON si lo necesitas
-        return f"""
-            mapajs.addGeoJSON(
-                new IDEE.layer.GeoJSON({{
-                    url: '{layer['dataSourceUri']}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_geojson(layer, name)
 
     def _layer_memory(self, layer, name):
-        # Aquí puedes añadir la lógica para capas en memoria
-        return f"""
-            // Capa en memoria: {name}
-        """
+        return layer_templates._layer_memory(layer, name)
 
     def _layer_ogc_api_features(self, uri, name, layer):
-        return f"""
-            mapajs.addOGCAPIFeatures(
-                new IDEE.layer.OGCAPIFeatures({{
-                    url: '{uri}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_ogc_api_features(uri, name, layer)
 
     def _layer_libkml(self, layer, name):
-        return f"""
-            mapajs.addKML(
-                new IDEE.layer.KML({{
-                    url: '{layer['dataSourceUri']}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_libkml(layer, name)
 
     def _layer_mvt(self, url, name, layer):
-        return f"""
-            mapajs.addMVT(
-                new IDEE.layer.MVT({{
-                    url: '{url}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_mvt(url, name, layer)
 
     def _layer_maplibre(self, url, name, layer):
-        return f"""
-            mapajs.addMapLibre(
-                new IDEE.layer.MapLibre({{
-                    styleUrl: '{url}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
-        """
+        return layer_templates._layer_maplibre(url, name, layer)
 
     def _layer_vector(self, layer, name):
-        # Aquí puedes añadir la lógica para exportar la capa vectorial como GeoJSON
-        return f"""
-            // Capa vectorial: {name}
-        """
+        return layer_templates._layer_vector(layer, name)
 
 
     def QGISStyle2apiideeStyle(self, qgisLayerLegend):

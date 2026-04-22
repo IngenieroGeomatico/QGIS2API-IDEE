@@ -35,6 +35,7 @@ from .resources import *
 # Import the code for the dialog
 from .QGIS2APIIDEE_dialog import QGIS2APIIDEEDialog
 import os.path
+from .formulario.layer_utils import add_layer_row
 
 # Importación cosas pyQGIS
 from qgis.core import QgsProject, QgsMapLayer, QgsWkbTypes
@@ -218,111 +219,29 @@ class QGIS2APIIDEE:
         """
             Load layers in table
         """
-
         tablaCapas = self.dlg.tableWidget_capas
         tablaCapas.setEditTriggers(QAbstractItemView.NoEditTriggers)
         tablaCapas.setRowCount(0)
 
-        for layer in QgsProject.instance().layerTreeRoot().findLayers():
+        for layer_ref in QgsProject.instance().layerTreeRoot().findLayers():
             from console import console
             console.show_console()
-            
-            layer = QgsProject.instance().mapLayersByName(layer.name())[0]
+
+            layer = QgsProject.instance().mapLayersByName(layer_ref.name())[0]
 
             print('-----------------')
-            print('layer.type(): ',layer.type())
-            print('layer.name():', layer.name() )
-            print('layer.source() :',layer.source())
+            print('layer.type(): ', layer.type())
+            print('layer.name():', layer.name())
+            print('layer.source() :', layer.source())
             print('dataSourceUri():', layer.dataProvider().dataSourceUri())
-            # print("layer.htmlMetadata()", layer.htmlMetadata())
             try:
                 print('storageType():', layer.dataProvider().storageType())
             except:
                 print('storageType():', '---')
             print('-----------------')
-            
-            # Contenido de la tabla:
-            # [(id tabla), capa superpuesta, visible, tipo de capa, fuente de la capa, nombre]
-            
-            # Sacar la posición de la tupla en la tabla
-            rowPosition = tablaCapas.rowCount()
-            tablaCapas.insertRow(rowPosition)
 
-            # Crear y añadir a la tabla el selector de capa superpuesta
-            checkCapa = QCheckBox()
-            checkCapa.setChecked(True)
-            checkbox_layout_checkCapas = QHBoxLayout()
-            checkbox_layout_checkCapas.addWidget(checkCapa)
-            checkbox_layout_checkCapas.setAlignment(checkCapa, QtCore.Qt.AlignCenter)
-            checkbox_widget_checkCapas = QWidget()
-            checkbox_widget_checkCapas.setLayout(checkbox_layout_checkCapas)
-            tablaCapas.setCellWidget(rowPosition , 0, checkbox_widget_checkCapas)
-
-            # Crear y añadir el selector de capa visible
-            checkCapaVisible = QCheckBox()
-            checkCapaVisible.setChecked(True)
-            checkbox_layout_CapaVisible = QHBoxLayout()
-            checkbox_layout_CapaVisible.addWidget(checkCapaVisible)
-            checkbox_layout_CapaVisible.setAlignment(checkCapaVisible, QtCore.Qt.AlignCenter)
-            checkbox_widget_CapaVisible = QWidget()
-            checkbox_widget_CapaVisible.setLayout(checkbox_layout_CapaVisible)
-            tablaCapas.setCellWidget(rowPosition , 1, checkbox_widget_CapaVisible)
-
-            
-            # Condicional para obtener el tipo de capa
-            if layer.type() == QgsMapLayer.VectorLayer:
-                item = QTableWidgetItem("Vector")# create the item
-            elif layer.type() == QgsMapLayer.RasterLayer:
-                item = QTableWidgetItem("Ráster")# create the item
-            elif layer.type() == QgsMapLayer.VectorTileLayer:
-                item = QTableWidgetItem("Vector")# create the item
-            else:
-                item = QTableWidgetItem("---") # create the item
-            item.setTextAlignment(QtCore.Qt.AlignCenter) # change the alignment
-            tablaCapas.setItem(rowPosition , 2, item)
-
-            # Condicional para saber el tipo de fuente de la capa
-            uri = layer.dataProvider().dataSourceUri()
-            if uri == '':
-                uri = layer.source()
-
-
-            if layer.type() == QgsMapLayer.VectorLayer:
-                storageType = layer.dataProvider().storageType()
-
-            elif layer.type() == QgsMapLayer.VectorTileLayer:
-                # print(uri)
-                if "styleUrl=" in uri:
-                    storageType = "MapLibre"
-                elif "%7By%7D" in uri or "{y}" in uri:
-                    storageType = "MVT"
-                else:
-                    storageType = "---"
-                    
-            elif layer.type() == QgsMapLayer.RasterLayer:
-                if "%7By%7D" in uri or "{y}" in uri:
-                    storageType = "XYZ"
-                elif "%7B-y%7D" in uri or "{-y}" in uri:
-                    storageType = "TMS"
-                elif "tileMatrixSet" in uri:
-                    storageType = "WMTS"
-                elif ("GeoTIFF" in layer.htmlMetadata() and "/vsicurl/" in uri):
-                    storageType = "GeoTIFF"
-                elif not 'url=' in uri:
-                    storageType = "---"
-                elif layer.providerType() == 'wms':
-                    storageType = "WMS"
-            else:
-                storageType = "---"
-            item =  QTableWidgetItem(storageType)
-            item.setTextAlignment(QtCore.Qt.AlignCenter)
-            tablaCapas.setItem(rowPosition , 3, item)
-
-
-            # Obtener el nombre de la capa
-            item =  QTableWidgetItem(layer.name())# create the item
-            item.setTextAlignment(QtCore.Qt.AlignCenter) # change the alignment
-            tablaCapas.setItem(rowPosition , 4, item)
+            # Delegar en la utilidad para añadir la fila completa
+            add_layer_row(tablaCapas, layer)
 
     
             
