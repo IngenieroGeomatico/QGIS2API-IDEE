@@ -1,5 +1,6 @@
 import os
 import urllib.parse
+import re
 from qgis.core import QgsVectorFileWriter, QgsCoordinateReferenceSystem, QgsMessageLog
 from qgis.core import QgsMapLayer
 from qgis.utils import Qgis
@@ -16,10 +17,63 @@ def remove_spaces(txt):
     return '"'.join(it if i % 2 else ''.join(it.split())
                     for i, it in enumerate(txt.split('"')))
 
+def is_layer_source_online(layer_or_uri):
+    """Return True if the layer's data source contains an HTTP(S) URL.
+
+    Accepts either a QGIS layer object (e.g. `QgsMapLayer`) or a
+    data-source URI string. This treats any occurrence of `http://` or
+    `https://` (including URLs inside parameters like `url=` or
+    `/vsicurl/`) as remote. Everything else is considered local/relative.
+    """
+    # Accept a plain URI string
+    if isinstance(layer_or_uri, str):
+        src = layer_or_uri
+    else:
+        # Try common layer accessors; fall back gracefully
+        try:
+            src = layer_or_uri.source()
+        except Exception:
+            try:
+                src = layer_or_uri.dataProvider().dataSourceUri()
+            except Exception:
+                return False
+
+    if not src:
+        return False
+
+    # Decode URL-encoded characters
+    src = urllib.parse.unquote(str(src))
+
+    # Quick literal checks
+    if 'http://' in src or 'https://' in src:
+        return True
+
+    # /vsicurl/http... is used by GDAL to wrap remote files
+    if '/vsicurl/http' in src or '/vsicurl/https' in src:
+        return True
+
+    # look for url=<http...> patterns in query strings or provider URIs
+    m = re.search(r'url=(https?://[^&\s]+)', src, flags=re.IGNORECASE)
+    if m:
+        return True
+
+    # parse query parameters and check values
+    try:
+        q = urllib.parse.urlparse(src).query
+        params = urllib.parse.parse_qs(q)
+        for vals in params.values():
+            for v in vals:
+                if v.startswith('http://') or v.startswith('https://'):
+                    return True
+    except Exception:
+        pass
+
+    return False
+
 
 def to_local_geojson(layer, apiideeStyle):
     # Recreates the JS loader used to load a local GeoJSON variable and add it to the map
-    name = layer['nameLegend'].replace(" ", "").replace("—", "_")
+    name = layer['nameLegend_file'].replace(" ", "").replace("-", "_")
     sourceFolder = layer['sourceFolder']
     file = f"{name}.js"
     visible = str(layer['visible']).lower()
@@ -643,8 +697,13 @@ def _layer_vector(layer, name):
 
 def JSONLayer2StringLayer(layer):
     tipo = layer['layerSourceType']
-    name = layer['nameLegend'].replace(" ", "").replace("—", "_")
+    name =  layer['nameLegend'].replace(" ", "").replace("-", "_")
+    layer['nameLegend_file'] = name
     uri = layer['dataSourceUri']
+
+    is_online = is_layer_source_online(uri)
+    if not is_online:
+        tipo = 'Memory storage'
 
     if tipo == 'XYZ':
         url = urllib.parse.unquote(get_url_param(uri, 'url'))
