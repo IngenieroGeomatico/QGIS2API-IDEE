@@ -10,12 +10,13 @@ import os
 import urllib.parse
 
 
-
 #TODO: reparar las capas en local 
+
 
 def remove_spaces(txt):
     return '"'.join(it if i % 2 else ''.join(it.split())
                     for i, it in enumerate(txt.split('"')))
+
 
 def is_layer_source_online(layer_or_uri):
     """Return True if the layer's data source contains an HTTP(S) URL.
@@ -738,3 +739,5 @@ def JSONLayer2StringLayer(layer):
         return _layer_vector(layer, name)
     else:
         return ''
+
+
