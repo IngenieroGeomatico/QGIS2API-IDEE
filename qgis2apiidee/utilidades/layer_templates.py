@@ -5,14 +5,19 @@ from qgis.core import QgsMapLayer
 from qgis.utils import Qgis
 from qgis.core import QgsProject
 from PyQt5 import QtCore
+import os
+import urllib.parse
 
+
+
+#TODO: reparar las capas en local 
 
 def remove_spaces(txt):
     return '"'.join(it if i % 2 else ''.join(it.split())
                     for i, it in enumerate(txt.split('"')))
 
 
-def to_local_geojson(layer, layerGJSON, apiideeStyle):
+def to_local_geojson(layer, apiideeStyle):
     # Recreates the JS loader used to load a local GeoJSON variable and add it to the map
     name = layer['nameLegend'].replace(" ", "").replace("—", "_")
     sourceFolder = layer['sourceFolder']
@@ -433,11 +438,14 @@ def QGISStyle2apiideeStyle(qgisLayerLegend):
     return apiideeStyle
 
 
-def save_vector_layer_as_geojson(layer, export_folder, name):
-    path = f"{export_folder}/{name}.js"
+def save_vector_layer_as_geojson(layer, name):
+    path = f"{layer['exportFolderSources']}/{name}.js"
     options = ["COORDINATE_PRECISION=6"]
+    # `layer` here is a dict coming from the JSON representation; the actual
+    # QgsVectorLayer object is stored under the 'QGISlayer' key.
+    qgis_layer = layer.get('QGISlayer', layer)
     e, err = QgsVectorFileWriter.writeAsVectorFormat(
-        layer, path + '_tmp', "utf-8",
+        qgis_layer, path + '_tmp', "utf-8",
         QgsCoordinateReferenceSystem("EPSG:4326"),
         'GeoJson', 0, layerOptions=options
     )
@@ -565,9 +573,10 @@ def _layer_geojson(layer, name):
 
 
 def _layer_memory(layer, name):
-    return f"""
-            // Capa en memoria: {name}
-        """
+    name = save_vector_layer_as_geojson(layer, name)
+    apiideeStyle = QGISStyle2apiideeStyle(layer['nameLegend'])
+    layerString = to_local_geojson(layer, apiideeStyle)
+    return layerString
 
 
 def _layer_ogc_api_features(uri, name, layer):
