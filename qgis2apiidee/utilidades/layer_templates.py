@@ -1,22 +1,98 @@
 import os
 import urllib.parse
 import re
+import json
 from qgis.core import QgsVectorFileWriter, QgsCoordinateReferenceSystem, QgsMessageLog
 from qgis.core import QgsMapLayer
 from qgis.utils import Qgis
 from qgis.core import QgsProject
 from PyQt5 import QtCore
-import os
-import urllib.parse
 
 
-#TODO: reparar las capas en local 
+
 
 
 def remove_spaces(txt):
     return '"'.join(it if i % 2 else ''.join(it.split())
                     for i, it in enumerate(txt.split('"')))
 
+def parse_pipe_source_qgis(s):
+    """Parse layer source strings coming from QGIS.
+
+    Supports two formats:
+    - Pipe-separated: "url: '...|layername=Name'" (or without the leading "url:")
+      Returns {'url': ..., 'layername': ...}
+    - Ampersand-separated query: "crs=...&dpiMode=...&url=https://..."
+      Returns a dict of parsed params (values URL-decoded).
+    """
+    s = s.strip().rstrip(',')
+    m = re.search(r"url\s*:\s*(['\"])(.*)\\1", s)
+    if m:
+        content = m.group(2)
+    else:
+        content = re.sub(r'^\s*url\s*:\s*', '', s, flags=re.IGNORECASE).strip("'\"")
+
+    # If pipe-separated parts are present, prefer that parsing
+    if '|' in content:
+        parts = content.split('|')
+        result = {'url': parts[0]}
+        for part in parts[1:]:
+            if '=' in part:
+                k, v = part.split('=', 1)
+                result[k] = urllib.parse.unquote(v)
+            else:
+                result.setdefault('params', []).append(part)
+        return result
+
+    # If content contains space-separated tokens (URLs and key=val pairs), parse them.
+    if ' ' in content:
+        import shlex
+        url_pattern = re.compile(r'https?://[^\s]+')
+        tokens = shlex.split(content)
+        result = {}
+        urls = []
+        for token in tokens:
+            if url_pattern.match(token):
+                urls.append(token)
+            elif '=' in token:
+                k, v = token.split('=', 1)
+                v = urllib.parse.unquote(v)
+                if k in result:
+                    if isinstance(result[k], list):
+                        result[k].append(v)
+                    else:
+                        result[k] = [result[k], v]
+                else:
+                    result[k] = v
+            else:
+                # free token, store under 'params'
+                result.setdefault('params', []).append(token)
+
+        if urls:
+            # keep compatibility: 'url' is first URL, 'urls' contains all
+            result['url'] = urls[0]
+            if len(urls) > 1:
+                result['urls'] = urls
+        return result
+
+        # Otherwise, try parsing as an URL-style query string with & separators
+    if '&' in content or '=' in content:
+        # parse_qsl decodes percent-encoding; keep blank values
+        pairs = urllib.parse.parse_qsl(content, keep_blank_values=True)
+        result = {}
+        for k, v in pairs:
+            if k in result:
+                # turn repeated keys into lists
+                if isinstance(result[k], list):
+                    result[k].append(v)
+                else:
+                    result[k] = [result[k], v]
+            else:
+                result[k] = v
+        return result
+
+    # Fallback: return the raw content as url
+    return {'url': content}
 
 def is_layer_source_online(layer_or_uri):
     """Return True if the layer's data source contains an HTTP(S) URL.
@@ -74,7 +150,7 @@ def is_layer_source_online(layer_or_uri):
 
 def to_local_geojson(layer, apiideeStyle):
     # Recreates the JS loader used to load a local GeoJSON variable and add it to the map
-    name = layer['nameLegend_file'].replace(" ", "").replace("-", "_")
+    name = layer['nameLegend_file'].replace(" ", "").replace("-", "_").replace("—","_")
     sourceFolder = layer['sourceFolder']
     file = f"{name}.js"
     visible = str(layer['visible']).lower()
@@ -144,9 +220,106 @@ def to_local_geojson(layer, apiideeStyle):
 
 def QGISStyle2apiideeStyle(qgisLayerLegend):
     # Port of the style conversion logic from the dialog into utilidades
-    qgisLayer = QgsProject.instance().mapLayersByName(qgisLayerLegend)[0]
+    # Accept either a layer name (string) or an actual QgsMapLayer instance.
+    qgisLayer = None
+    if isinstance(qgisLayerLegend, str):
+        layers = QgsProject.instance().mapLayersByName(qgisLayerLegend)
+        if not layers:
+            QgsMessageLog.logMessage(
+                f"QGISStyle2apiideeStyle: no layer named {qgisLayerLegend}",
+                "QGIS2APIIDEE",
+                Qgis.Warning,
+            )
+            # Return a sensible default style if the layer can't be found
+            return '''new M.style.Generic({
+                            point: {
+                                fill: {
+                                    color: 'orange',
+                                    opacity: 0.6,
+                                },
+                                stroke: {
+                                    color: 'red',
+                                    opacity: 0.8,
+                                    width: 2, 
+                                }
+                            },
+                            polygon: {
+                                fill: {
+                                    color: 'orange',
+                                    opacity: 0.6,
+                                },
+                                stroke: {
+                                    color: 'red',
+                                    opacity: 0.8,
+                                    width: 2, 
+                                }
+                            },
+                            line: {
+                                fill: {
+                                    color: 'orange',
+                                    opacity: 0.6,
+                                },
+                                stroke: {
+                                    color: 'red',
+                                    opacity: 0.8,
+                                    width: 2, 
+                                }
+                            }
+                        })'''
+        qgisLayer = layers[0]
+    else:
+        # assume it's already a QgsMapLayer-like object
+        qgisLayer = qgisLayerLegend
 
-    typeStyle = qgisLayer.renderer().type()
+    # Some layer types (or invalid objects) may not have a renderer
+    try:
+        renderer = qgisLayer.renderer()
+    except Exception:
+        renderer = None
+
+    if renderer is None:
+        QgsMessageLog.logMessage(
+            f"QGISStyle2apiideeStyle: layer renderer is None for {getattr(qgisLayer, 'name', qgisLayerLegend)}",
+            "QGIS2APIIDEE",
+            Qgis.Warning,
+        )
+        return '''new M.style.Generic({
+                            point: {
+                                fill: {
+                                    color: 'orange',
+                                    opacity: 0.6,
+                                },
+                                stroke: {
+                                    color: 'red',
+                                    opacity: 0.8,
+                                    width: 2, 
+                                }
+                            },
+                            polygon: {
+                                fill: {
+                                    color: 'orange',
+                                    opacity: 0.6,
+                                },
+                                stroke: {
+                                    color: 'red',
+                                    opacity: 0.8,
+                                    width: 2, 
+                                }
+                            },
+                            line: {
+                                fill: {
+                                    color: 'orange',
+                                    opacity: 0.6,
+                                },
+                                stroke: {
+                                    color: 'red',
+                                    opacity: 0.8,
+                                    width: 2, 
+                                }
+                            }
+                        })'''
+
+    typeStyle = renderer.type()
 
     try:
         legendClassificationAttribute = qgisLayer.renderer().legendClassificationAttribute()
@@ -575,10 +748,12 @@ def _layer_wmts(uri, name, layer):
     return f"""
             mapajs.addWMTS(
                 new IDEE.layer.WMTS({{
-                    url: '{uri}',
-                    name: '{name}',
+                    url: '{layer['sourceParams_url']}',
+                    name: '{layer['sourceParams_layers']}',
                     visibility: {str(layer['visible']).lower()},
                     legend: '{name}',
+                    useCapabilities:false,
+                    matrixSet: '{layer['sourceParams_tileMatrixSet']}',
                 }})
             );
             mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
@@ -589,10 +764,11 @@ def _layer_wms(uri, name, layer):
     return f"""
             mapajs.addWMS(
                 new IDEE.layer.WMS({{
-                    url: '{uri}',
-                    name: '{name}',
+                    url: '{layer['sourceParams_url']}',
+                    name: '{layer['sourceParams_layers']}',
                     visibility: {str(layer['visible']).lower()},
                     legend: '{name}',
+                    useCapabilities:false,
                 }})
             );
             mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
@@ -603,8 +779,8 @@ def _layer_wfs(uri, name, layer):
     return f"""
             mapajs.addWFS(
                 new IDEE.layer.WFS({{
-                    url: '{uri}',
-                    name: '{name}',
+                    url: '{layer['sourceParams_url']}',
+                    name: '{layer['sourceParams_typename']}',
                     visibility: {str(layer['visible']).lower()},
                     legend: '{name}',
                 }})
@@ -615,10 +791,10 @@ def _layer_wfs(uri, name, layer):
 
 def _layer_geojson(layer, name):
     return f"""
-            mapajs.addGeoJSON(
+            mapajs.addLayers(
                 new IDEE.layer.GeoJSON({{
-                    url: '{layer['dataSourceUri']}',
-                    name: '{name}',
+                    url: '{layer['sourceParams_url']}',
+                    name: '{layer['sourceParams_layername']}',
                     visibility: {str(layer['visible']).lower()},
                     legend: '{name}',
                 }})
@@ -629,7 +805,13 @@ def _layer_geojson(layer, name):
 
 def _layer_memory(layer, name):
     name = save_vector_layer_as_geojson(layer, name)
-    apiideeStyle = QGISStyle2apiideeStyle(layer['nameLegend'])
+    # Prefer passing the actual QgsMapLayer object if available to avoid
+    # lookups by name (which may fail for temporary layers).
+    qgis_layer_obj = layer.get('QGISlayer', None)
+    if qgis_layer_obj is not None:
+        apiideeStyle = QGISStyle2apiideeStyle(qgis_layer_obj)
+    else:
+        apiideeStyle = QGISStyle2apiideeStyle(layer['nameLegend'])
     layerString = to_local_geojson(layer, apiideeStyle)
     return layerString
 
@@ -638,8 +820,8 @@ def _layer_ogc_api_features(uri, name, layer):
     return f"""
             mapajs.addOGCAPIFeatures(
                 new IDEE.layer.OGCAPIFeatures({{
-                    url: '{uri}',
-                    name: '{name}',
+                    url: '{layer['sourceParams_url']}/collections/',
+                    name: '{layer['sourceParams_typename']}',
                     visibility: {str(layer['visible']).lower()},
                     legend: '{name}',
                 }})
@@ -652,10 +834,13 @@ def _layer_libkml(layer, name):
     return f"""
             mapajs.addKML(
                 new IDEE.layer.KML({{
-                    url: '{layer['dataSourceUri']}',
+                    url: '{layer['sourceParams_url']}',
+                    layers: '{layer['sourceParams_layername']}',
                     name: '{name}',
                     visibility: {str(layer['visible']).lower()},
                     legend: '{name}',
+                }},{{
+                    extractStyles:true
                 }})
             );
             mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
@@ -680,7 +865,7 @@ def _layer_maplibre(url, name, layer):
     return f"""
             mapajs.addMapLibre(
                 new IDEE.layer.MapLibre({{
-                    styleUrl: '{url}',
+                    url: '{url}',
                     name: '{name}',
                     visibility: {str(layer['visible']).lower()},
                     legend: '{name}',
@@ -698,41 +883,51 @@ def _layer_vector(layer, name):
 
 def JSONLayer2StringLayer(layer):
     tipo = layer['layerSourceType']
-    name =  layer['nameLegend'].replace(" ", "").replace("-", "_")
+    name =  layer['nameLegend'].replace(" ", "").replace("-", "_").replace("—","_")
     layer['nameLegend_file'] = name
     uri = layer['dataSourceUri']
 
     is_online = is_layer_source_online(uri)
     if not is_online:
         tipo = 'Memory storage'
+    else:
+        uri = uri.replace("/vsicurl/", "").replace("/http", "http").replace("file://", "")
+        layer['dataSourceUri'] = layer['dataSourceUri'].replace("/vsicurl/", "").replace("/http", "http").replace("file://", "")
+        json_parse_uri_values = parse_pipe_source_qgis(layer['dataSourceUri'])
+        if json_parse_uri_values:
+            for key, value in json_parse_uri_values.items():
+                layer[f"sourceParams_{key}"] = value
+                print(f"sourceParams_{key}", value)
 
-    if tipo == 'XYZ':
+
+    #TODO: aplicar estilos a las capas vectoriales
+
+    if tipo == 'XYZ': #OK
         url = urllib.parse.unquote(get_url_param(uri, 'url'))
-        return _layer_xyz(url, name, layer)
-    elif tipo == 'TMS':
+        return _layer_xyz(url, name, layer) 
+    elif tipo == 'TMS': #OK
         url = urllib.parse.unquote(get_url_param(uri, 'url'))
         return _layer_tms(url, name, layer)
-    elif tipo == 'GeoTIFF':
-        url = uri.replace("/vsicurl/", "")
-        return _layer_geotiff(url, name, layer)
-    elif tipo == 'WMTS':
+    elif tipo == 'GeoTIFF': #OK
+        return _layer_geotiff(uri, name, layer)
+    elif tipo == 'WMTS':  #OK
         return _layer_wmts(uri, name, layer)
-    elif tipo == 'WMS':
+    elif tipo == 'WMS':  #OK
         return _layer_wms(uri, name, layer)
-    elif tipo == 'OGC WFS (Web Feature Service)':
+    elif tipo == 'OGC WFS (Web Feature Service)': #OK
         return _layer_wfs(uri, name, layer)
-    elif tipo == 'GeoJSON':
+    elif tipo == 'GeoJSON': #OK
         return _layer_geojson(layer, name)
-    elif tipo == 'Memory storage':
+    elif tipo == 'Memory storage': #OK
         return _layer_memory(layer, name)
-    elif tipo == 'OGC API - Features':
+    elif tipo == 'OGC API - Features': #OK
         return _layer_ogc_api_features(uri, name, layer)
-    elif tipo == 'LIBKML':
+    elif tipo == 'LIBKML': #OK
         return _layer_libkml(layer, name)
-    elif tipo == 'MVT':
+    elif tipo == 'MVT': #OK
         url = get_url_param(uri, 'url')
         return _layer_mvt(url, name, layer)
-    elif tipo == 'MapLibre':
+    elif tipo == 'MapLibre': #OK
         url = get_url_param(uri, 'styleUrl')
         return _layer_maplibre(url, name, layer)
     elif layer['QGISlayer'].type() == QgsMapLayer.VectorLayer:

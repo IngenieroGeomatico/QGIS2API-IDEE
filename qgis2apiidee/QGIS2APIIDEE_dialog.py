@@ -216,6 +216,10 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         self.close()
         return
 
+    # TODO: hacer exportación 3D
+    def exportMap_3D(self):
+        return
+    
     def QGISStyle2apiideeStyle(self, qgisLayerLegend):
         return layer_templates.QGISStyle2apiideeStyle(qgisLayerLegend)
 
