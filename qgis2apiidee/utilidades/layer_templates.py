@@ -209,6 +209,7 @@ def _parse_color(props, keys=('color', 'line_color', 'fill_color')):
             return (rgb, opacity)
     return ('rgb(255,153,0)', 0.6)
 
+
 def _make_generic_js(fill_rgb, fill_opacity, stroke_rgb, stroke_opacity, stroke_width):
     return '''new M.style.Generic({
         point: {
@@ -228,6 +229,7 @@ def _make_generic_js(fill_rgb, fill_opacity, stroke_rgb, stroke_opacity, stroke_
         fill_rgb, fill_opacity, stroke_rgb, stroke_opacity, stroke_width,
         fill_rgb, fill_opacity, stroke_rgb, stroke_opacity, stroke_width
     )
+
 
 def QGISStyle2apiideeStyle(qgisLayerLegend):
     """
@@ -332,6 +334,7 @@ def QGISStyle2apiideeStyle(qgisLayerLegend):
     stroke_rgb, stroke_opacity = _parse_color(default_props, keys=('outline_color','line_color'))
     stroke_width = float(default_props.get('outline_width', 2))
     return [_make_generic_js(fill_rgb, fill_opacity, stroke_rgb, stroke_opacity, stroke_width), ""]
+
 
 def save_vector_layer_as_geojson(layer, name):
     path = f"{layer['exportFolderSources']}/{name}.js"
@@ -480,6 +483,7 @@ def _layer_geojson(layer, name, apiideeStyle):
             );
             mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
         """
+
 
 def _layer_memory(layer, name):
     name = save_vector_layer_as_geojson(layer, name)

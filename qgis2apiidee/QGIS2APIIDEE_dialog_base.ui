@@ -80,7 +80,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_opcionesMapa_2D">
       <property name="enabled">
@@ -554,7 +554,7 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_12">
             <item row="1" column="2">
-             <widget class="QToolButton" name="toolButton_ExportMap_2">
+             <widget class="QToolButton" name="toolButton_ExportMap_3D_2D">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -580,7 +580,7 @@
              </widget>
             </item>
             <item row="0" column="2">
-             <widget class="QToolButton" name="toolButtonSelectFolder_2">
+             <widget class="QToolButton" name="toolButtonSelectFolder_3D_2D">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -848,8 +848,8 @@ p, li { white-space: pre-wrap; }
    <slot>selectFolder()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>954</x>
-     <y>636</y>
+     <x>726</x>
+     <y>438</y>
     </hint>
     <hint type="destinationlabel">
      <x>552</x>
@@ -864,8 +864,8 @@ p, li { white-space: pre-wrap; }
    <slot>exportMap()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>970</x>
-     <y>677</y>
+     <x>708</x>
+     <y>471</y>
     </hint>
     <hint type="destinationlabel">
      <x>552</x>
@@ -873,10 +873,43 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>toolButtonSelectFolder_3D_2D</sender>
+   <signal>clicked()</signal>
+   <receiver>QGIS2APIIDEEDialogBase</receiver>
+   <slot>selectFolder()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>664</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>312</x>
+     <y>546</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>toolButton_ExportMap_3D_2D</sender>
+   <signal>clicked()</signal>
+   <receiver>QGIS2APIIDEEDialogBase</receiver>
+   <slot>exportMap_3D_2D()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>687</x>
+     <y>434</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>718</x>
+     <y>538</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>selectFolder()</slot>
   <slot>exportMap()</slot>
+  <slot>exportMap_3D_2D()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="buttonGroup"/>

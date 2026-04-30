@@ -54,15 +54,18 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
 
     def selectFolder(self):
         dialog = QtWidgets.QFileDialog()
-        if self.lineEdit_Folder.text().replace(" ", "").replace("—", "_") == '':
-            folder_path = dialog.getExistingDirectory(None, "Selecciona carpeta de salida")
-        else:
+        if self.lineEdit_Folder.text().replace(" ", "").replace("—", "_") != "":
             folder_path = dialog.getExistingDirectory(self.lineEdit_Folder, "Selecciona carpeta de salida")
+        elif self.lineEdit_Folder_2.text().replace(" ", "").replace("—", "_") != "":
+            folder_path = dialog.getExistingDirectory(self.lineEdit_Folder_2, "Selecciona carpeta de salida")
+        else:
+            folder_path = dialog.getExistingDirectory(None, "Selecciona carpeta de salida")
 
         if folder_path is None or folder_path == "":
-            folder_path = self.lineEdit_Folder.text()
+            folder_path = self.lineEdit_Folder.text() or self.lineEdit_Folder_2.text()
 
         self.lineEdit_Folder.setText(folder_path)
+        self.lineEdit_Folder_2.setText(folder_path)
         return folder_path
 
     def exportMap(self):
@@ -217,7 +220,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         return
 
     # TODO: hacer exportación 3D
-    def exportMap_3D(self):
+    def exportMap_3D_2D(self):
         return
     
     def QGISStyle2apiideeStyle(self, qgisLayerLegend):
