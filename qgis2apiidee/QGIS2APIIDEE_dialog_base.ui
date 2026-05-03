@@ -80,7 +80,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_opcionesMapa_2D">
       <property name="enabled">
@@ -503,21 +503,21 @@
            </property>
            <layout class="QGridLayout" name="gridLayout_8">
             <item row="2" column="0">
-             <widget class="QCheckBox" name="checkBox_2">
+             <widget class="QCheckBox" name="checkBox_cambioImpl_2D3D">
               <property name="text">
                <string>Cambio de 2D/3D</string>
               </property>
              </widget>
             </item>
             <item row="0" column="0">
-             <widget class="QCheckBox" name="checkBox_selectorCapa_2">
+             <widget class="QCheckBox" name="checkBox_selectorCapa_2D3D">
               <property name="text">
                <string>Selector de capa</string>
               </property>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="checkBox_capaBase_2D3D">
               <property name="text">
                <string>Selector de capa base</string>
               </property>

@@ -71,12 +71,20 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
     def exportMap(self):
         projectSource = "/QGIS2APIIDEE"
         sourceFolder = "/Sources"
+        APIFolder = "/API_IDEE"
+        APInucleo = "/nucleo"
+        APIextension = "/ext"
+        APIextension_layerSwitcher = "/layerSwitcher"
         JSFolder = "/JS"
         CSSFolder = "/CSS"
         pluginQGIS2APIIDEE = "/pluginQGIS2APIIDEE"
 
         exportFolder = self.lineEdit_Folder.text() + projectSource
         exportFolderSources = self.lineEdit_Folder.text() + projectSource + sourceFolder
+
+        exportFolderAPI_nucleo = self.lineEdit_Folder.text() + projectSource + APIFolder + APInucleo
+        exportFolderAPI_extension_layerSwitcher = self.lineEdit_Folder.text() + projectSource + APIFolder + APIextension + APIextension_layerSwitcher
+
         exportJSFolder = self.lineEdit_Folder.text() + projectSource + JSFolder
         exportCSSFolder = self.lineEdit_Folder.text() + projectSource + CSSFolder
 
@@ -87,8 +95,27 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
 
         Path(exportFolder).mkdir(parents=True, exist_ok=True)
         Path(exportFolderSources).mkdir(parents=True, exist_ok=True)
+
+        Path(exportFolderAPI_nucleo).mkdir(parents=True, exist_ok=True)
+        Path(exportFolderAPI_extension_layerSwitcher).mkdir(parents=True, exist_ok=True)
+
         Path(exportJSFolder).mkdir(parents=True, exist_ok=True)
         Path(exportCSSFolder).mkdir(parents=True, exist_ok=True)
+
+        #Copia de API
+        shutil.copyfile(
+                        os.path.dirname(__file__) + '/src_API-IDEE/v_1.0.0/nucleo/apiidee.ol.min.css',
+                        exportFolderAPI_nucleo + '/apiidee.ol.min.css')
+        shutil.copyfile(os.path.dirname(__file__) + '/src_API-IDEE/v_1.0.0/nucleo/apiidee.ol.min.js',
+                        exportFolderAPI_nucleo + '/apiidee.ol.min.js')
+        shutil.copyfile(os.path.dirname(__file__) + '/src_API-IDEE/v_1.0.0/nucleo/configuration.js',
+                        exportFolderAPI_nucleo + '/configuration.js')
+
+        #copia de extesiones API-IDEE
+        shutil.copyfile(os.path.dirname(__file__) + '/src_API-IDEE/v_1.0.0/ext/layerSwitcher/layerswitcher.ol.min.css',
+                        exportFolderAPI_extension_layerSwitcher + '/layerswitcher.ol.min.css')
+        shutil.copyfile(os.path.dirname(__file__) + '/src_API-IDEE/v_1.0.0/ext/layerSwitcher/layerswitcher.ol.min.js',
+                        exportFolderAPI_extension_layerSwitcher + '/layerswitcher.ol.min.js')
 
         # Obtención de extensiones personalizadas QGIS2APIIDEE
         checkBox_ComparacionMapas = self.checkBox_ComparacionMapas.isChecked()
@@ -159,6 +186,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         layers = list(reversed(layers))
 
         # Controles
+      
         if self.checkBox_CapasBase.isChecked():
             controls.append('backgroundlayers')
         if self.checkBox_Rotacion.isChecked():
@@ -177,8 +205,8 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         # Plugins
         if self.checkBox_SelectorCapas.isChecked():
             headerImports = """
-                <link href="https://componentes.idee.es/api-idee/plugins/layerswitcher/layerswitcher-1.0.0.ol.min.css" rel="stylesheet" />
-                <script type="text/javascript" src="https://componentes.idee.es/api-idee/plugins/layerswitcher/layerswitcher-1.0.0.ol.min.js"></script>
+                <link href="./API_IDEE/ext/layerSwitcher/layerswitcher.ol.min.css" rel="stylesheet" />
+                <script type="text/javascript" src="./API_IDEE/ext/layerSwitcher/layerswitcher.ol.min.js"></script>
             """
             stringplugin = """
                 const mp_selectorCapa = new IDEE.plugin.Layerswitcher({
@@ -213,14 +241,178 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
             filetowrite.write(self.CreateCSS())
 
         with open(fileMap, 'w') as filetowrite:
-            filetowrite.write(self.CreateHTML(pluginImports, checkBox_ComparacionMapas))
+            filetowrite.write(
+                self.CreateHTML( 
+                    headerImports=pluginImports, 
+                    checkBox_ComparacionMapas= checkBox_ComparacionMapas
+                )
+            )
 
         webbrowser.open(fileMap, new=2)
         self.close()
         return
 
-    # TODO: hacer exportación 3D
     def exportMap_3D_2D(self):
+        projectSource = "/QGIS2APIIDEE"
+        sourceFolder = "/Sources"
+        APIFolder = "/API_IDEE"
+        APInucleo = "/nucleo"
+        APIextension = "/ext"
+        APIextension_layerSwitcher = "/layerSwitcher"
+        JSFolder = "/JS"
+        CSSFolder = "/CSS"
+        pluginQGIS2APIIDEE = "/pluginQGIS2APIIDEE"
+
+        exportFolder = self.lineEdit_Folder.text() + projectSource
+        exportFolderSources = self.lineEdit_Folder.text() + projectSource + sourceFolder
+
+        exportFolderAPI_nucleo = self.lineEdit_Folder.text() + projectSource + APIFolder + APInucleo
+        exportFolderAPI_extension_layerSwitcher = self.lineEdit_Folder.text() + projectSource + APIFolder + APIextension + APIextension_layerSwitcher
+
+        exportJSFolder = self.lineEdit_Folder.text() + projectSource + JSFolder
+        exportCSSFolder = self.lineEdit_Folder.text() + projectSource + CSSFolder
+
+        exportPluginQGIS2APIIDEE = self.lineEdit_Folder.text() + projectSource + pluginQGIS2APIIDEE
+
+        if Path(exportFolder).exists():
+            shutil.rmtree(exportFolder)
+
+        Path(exportFolder).mkdir(parents=True, exist_ok=True)
+        Path(exportFolderSources).mkdir(parents=True, exist_ok=True)
+
+        Path(exportJSFolder).mkdir(parents=True, exist_ok=True)
+        Path(exportCSSFolder).mkdir(parents=True, exist_ok=True)
+
+        #Copia de API
+        shutil.copytree(
+                        os.path.dirname(__file__) + '/src_API-IDEE/v_1.0.0/nucleo',
+                        exportFolderAPI_nucleo)
+
+        fileMap = exportFolder + '/index.html'
+        fileJS = exportJSFolder + '/QGIS2APIIDEE.js'
+        fileCSS = exportCSSFolder + '/QGIS2APIIDEE.css'
+
+        tableOfSources = self.tableWidget_capas
+
+        layers = []
+        controls = []
+        plugins = []
+        pluginImports = []
+
+        initialZIndexLayer = 100
+        for r in range(tableOfSources.rowCount()):
+            layer = {
+                'layerSourceType': '',
+                'url_path': '',
+                'format': '',
+                'style': '',
+                'nameLayer': '',
+                'nameLegend': '',
+                'visible': 0,
+                'isLocal': 0,
+                'dataSourceUri': '',
+                'source': '',
+                'QGISlayer': '',
+                'sourceFolder': sourceFolder,
+                'exportFolderSources': exportFolderSources,
+                'zIndex': initialZIndexLayer - r
+            }
+
+            for c in range(tableOfSources.columnCount()):
+                item = tableOfSources.item(r, c)
+                if item is None:
+                    cell_widget = tableOfSources.cellWidget(r, c)
+                    if cell_widget is not None:
+                        chk_box = cell_widget.findChild(QtWidgets.QCheckBox).isChecked()
+                        if c == 0 and not chk_box:
+                            break
+                        elif c == 1:
+                            layer['visible'] = chk_box
+                            continue
+                else:
+                    text = str(item.text())
+                    if c == 3:
+                        layer['layerSourceType'] = text
+                    elif c == 4:
+                        QGISlayer = QgsProject.instance().mapLayersByName(text)[0]
+                        layer['QGISlayer'] = QGISlayer
+                        layer['nameLegend'] = QGISlayer.name()
+                        layer['dataSourceUri'] = QGISlayer.dataProvider().dataSourceUri()
+                        layer['source'] = QGISlayer.source()
+                        if layer['dataSourceUri'] == '':
+                            layer['dataSourceUri'] = layer['source']
+                if c == tableOfSources.columnCount() - 1:
+                    layers.append(self.JSONLayer2StringLayer(layer))
+
+        layers = list(filter(lambda k: '' != k, layers))
+        layers = list(reversed(layers))
+
+
+        if self.checkBox_selectorCapa_2D3D.isChecked():
+            headerImports = """
+
+                <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext.css" rel="stylesheet" />
+                <script type="text/javascript" src="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext_layerSwitcher.js"></script>
+
+            """
+            pluginImports.append(headerImports)
+            stringplugin = """
+            selectorCapaPlugin = miPlugin
+            mapajs.addPlugin(selectorCapaPlugin)
+            """
+            plugins.append(stringplugin)
+        
+        if self.checkBox_capaBase_2D3D.isChecked():
+            headerImports = """
+
+                <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext.css" rel="stylesheet" />
+                <script type="text/javascript" src="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext_backgorundLayers.js"></script>
+
+            """
+            pluginImports.append(headerImports)
+            stringplugin = """
+            selectorCapaBasePlugin = miPlugin2
+            mapajs.addPlugin(selectorCapaBasePlugin)
+            """
+            plugins.append(stringplugin)
+        
+        changeImpl = False
+        if self.checkBox_cambioImpl_2D3D.isChecked():
+            changeImpl = True
+            headerImports = """
+
+                <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/cambioImpl/cambioImpl.css" rel="stylesheet" />
+                <script type="text/javascript" src="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/cambioImpl/cambioImpl.js"></script>
+
+            """
+            pluginImports.append(headerImports)
+            stringplugin = """
+            mapajs.addPlugin(pluginCamioImplFunc());
+            """
+            plugins.append(stringplugin)
+
+
+        extentQGIS = iface.mapCanvas().extent()
+        CRSQGIS = QgsProject.instance().crs()
+        ct = QgsCoordinateTransform(CRSQGIS, QgsCoordinateReferenceSystem('EPSG:3857'), QgsProject.instance())
+        bounds_crs = ct.transformBoundingBox(extentQGIS)
+        bbox = [bounds_crs.xMinimum(), bounds_crs.yMinimum(), bounds_crs.xMaximum(), bounds_crs.yMaximum()]
+
+        with open(fileJS, 'w') as filetowrite:
+            filetowrite.write(self.CreateJS_3D_2D(bbox, layers, controls, plugins, changeImpl))
+
+        with open(fileCSS, 'w') as filetowrite:
+            filetowrite.write(self.CreateCSS())
+        
+        with open(fileMap, 'w') as filetowrite:
+            filetowrite.write(self.CreateHTML( 
+                    headerImports=pluginImports
+                )
+            )
+
+
+        webbrowser.open(fileMap, new=2)
+        self.close()
         return
     
     def QGISStyle2apiideeStyle(self, qgisLayerLegend):
@@ -229,7 +421,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
     def JSONLayer2StringLayer(self, layer):
         return layer_templates.JSONLayer2StringLayer(layer)
 
-    def CreateHTML(self, headerImports, checkBox_ComparacionMapas):
+    def CreateHTML(self, headerImports=[], checkBox_ComparacionMapas=[]):
 
         headerImportsString = ''
         for l in headerImports:
@@ -469,12 +661,11 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                             <!--          -->
 
                             <!-- CSS API-IDEE -->
-                            <link type="text/css" rel="stylesheet" href="https://componentes.idee.es/api-idee/assets/css/apiidee-1.0.0.ol.min.css">
+                            <link type="text/css" rel="stylesheet" href="./API_IDEE/nucleo/apiidee.ol.min.css">
                             
                             <!-- JS API-IDEE  -->
-                            <script type="text/javascript" src="https://componentes.idee.es/api-idee/vendor/browser-polyfill.js"></script>
-                            <script type="text/javascript" src="https://componentes.idee.es/api-idee/js/apiidee-1.0.0.ol.min.js"></script>
-                            <script type="text/javascript" src="https://componentes.idee.es/api-idee/js/configuration-1.0.0.js"></script>
+                            <script type="text/javascript" src="./API_IDEE/nucleo/apiidee.ol.min.js"></script>
+                            <script type="text/javascript" src="./API_IDEE/nucleo/configuration.js"></script>
 
                             <!-- extensiones API-IDEE -->
                             {headerImports}
@@ -539,6 +730,70 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                     layers = layersString,
                     plugins = pluginString                
                     )
+        return JS
+    
+    #TODO: añadir mejoras de la reeeeefactorización de los plugin de capa base y selector de capa
+    #TODO: cuando todo funcione, refactorizar para mejorar código duplicado
+    def CreateJS_3D_2D(self, bbox, layers, controls, plugins, changeImpl):
+
+        layersString = ''
+        for l in layers:
+            layersString = layersString + l
+
+        pluginString = ''
+        for l in plugins:
+            pluginString = pluginString + l
+
+        if changeImpl:
+            changeImplString = """
+                function pluginCamioImplFunc() {
+                    return pluglinCambioImpl = new miPlugin_cambioImpl({
+                        buttonTitle: 'cambiar impl :)',
+                        // Pasar la referencia a la función sin paréntesis para evitar su ejecución inmediata
+                        mapsFunction: mapa,
+                        sameMap: true,
+                        shareView: true,
+                        shareLayers: true
+                    });
+                }
+            """
+        
+        JS = """
+        function mapa() {{        
+            // Configuración del mapa
+            let zoomInicial = 5
+            let longLatInicial = [-3, 40]
+            const zoom_p = IDEE.config.MAP_VIEWER_ZOOM || zoomInicial;
+            const center_p = IDEE.config.MAP_VIEWER_CENTER || ol.proj.fromLonLat(longLatInicial);
+            
+            IDEE.proxy(false) // Necesario para ejecutar el visualizador en local.
+            mapajs = IDEE.map({{
+                container: 'mapaJS_div',
+                controls: {controls},
+                bbox: {bbox}
+            }});
+            
+            const layers_p = IDEE.config.MAP_VIEWER_LAYERS || [];
+            mapajs.addLayers(layers_p)
+
+            {layers}
+
+            {plugins}
+
+            return mapajs
+        }}
+
+        {changeImplString}
+
+        mapajs = mapa()
+              
+        """.format(
+                    bbox = bbox,
+                    controls=controls,
+                    layers = layersString,
+                    plugins = pluginString,
+                    changeImplString=changeImplString                
+            )
         return JS
     
     def CreateCSS(self):
