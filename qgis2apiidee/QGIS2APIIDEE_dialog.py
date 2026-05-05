@@ -222,7 +222,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                         modeSelectLayers: 'eyes',
                         isMoveLayers: true,
                         tools: ['transparency', 'legend', 'zoom', 'information', 'style', 'delete']
-                    });
+                    }});
                 mapajs.addPlugin(mp_selectorCapa);
             """
             pluginImports.append(headerImports)
@@ -351,34 +351,30 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         if self.checkBox_selectorCapa_2D3D.isChecked():
             headerImports = """
 
-                <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext.css" rel="stylesheet" />
+                <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext_layerSwitcher.css" rel="stylesheet" />
                 <script type="text/javascript" src="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext_layerSwitcher.js"></script>
 
             """
             pluginImports.append(headerImports)
             stringplugin = """
-            selectorCapaPlugin = miPlugin
-            mapajs.addPlugin(selectorCapaPlugin)
+            mapajs.addPlugin(pluginCapasSuperpuestasFunc());
             """
             plugins.append(stringplugin)
         
         if self.checkBox_capaBase_2D3D.isChecked():
             headerImports = """
 
-                <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext.css" rel="stylesheet" />
+                <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext_backgorundLayers.css" rel="stylesheet" />
                 <script type="text/javascript" src="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/selectorCapas3D/ext_backgorundLayers.js"></script>
 
             """
             pluginImports.append(headerImports)
             stringplugin = """
-            selectorCapaBasePlugin = miPlugin2
-            mapajs.addPlugin(selectorCapaBasePlugin)
+            mapajs.addPlugin(pluginCapasBaseFunc());
             """
             plugins.append(stringplugin)
         
-        changeImpl = False
         if self.checkBox_cambioImpl_2D3D.isChecked():
-            changeImpl = True
             headerImports = """
 
                 <link href="https://ingenierogeomatico.github.io/Galeria_de_mapas/ext/cambioImpl/cambioImpl.css" rel="stylesheet" />
@@ -399,7 +395,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         bbox = [bounds_crs.xMinimum(), bounds_crs.yMinimum(), bounds_crs.xMaximum(), bounds_crs.yMaximum()]
 
         with open(fileJS, 'w') as filetowrite:
-            filetowrite.write(self.CreateJS_3D_2D(bbox, layers, controls, plugins, changeImpl))
+            filetowrite.write(self.CreateJS_3D_2D(bbox, layers, controls, plugins))
 
         with open(fileCSS, 'w') as filetowrite:
             filetowrite.write(self.CreateCSS())
@@ -715,7 +711,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                 container: 'mapaJS_div',
                 controls: {controls},
                 bbox: {bbox}
-            }});
+            }}});
             
             const layers_p = IDEE.config.MAP_VIEWER_LAYERS || [];
             mapajs.addLayers(layers_p)
@@ -734,7 +730,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
     
     #TODO: añadir mejoras de la reeeeefactorización de los plugin de capa base y selector de capa
     #TODO: cuando todo funcione, refactorizar para mejorar código duplicado
-    def CreateJS_3D_2D(self, bbox, layers, controls, plugins, changeImpl):
+    def CreateJS_3D_2D(self, bbox, layers, controls, plugins):
 
         layersString = ''
         for l in layers:
@@ -743,13 +739,12 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
         pluginString = ''
         for l in plugins:
             pluginString = pluginString + l
-
-        if changeImpl:
-            changeImplString = """
+        changeImplString = ''
+        if self.checkBox_cambioImpl_2D3D.isChecked():
+            changeImplString += """
                 function pluginCamioImplFunc() {
-                    return pluglinCambioImpl = new miPlugin_cambioImpl({
+                    return new miPlugin_cambioImpl({
                         buttonTitle: 'cambiar impl :)',
-                        // Pasar la referencia a la función sin paréntesis para evitar su ejecución inmediata
                         mapsFunction: mapa,
                         sameMap: true,
                         shareView: true,
@@ -757,10 +752,24 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                     });
                 }
             """
+        if self.checkBox_selectorCapa_2D3D.isChecked():
+            changeImplString += """
+                 function pluginCapasSuperpuestasFunc() {
+                    return new miPlugin_layerSwitcher()
+                }
+            """
+        
+        if self.checkBox_capaBase_2D3D.isChecked():
+            changeImplString += """
+                function pluginCapasBaseFunc() {
+                    return new miPlugin_baseLayer()
+                }
+            """
         
         JS = """
         function mapa() {{        
             // Configuración del mapa
+            updateConfigBaseLayer()
             let zoomInicial = 5
             let longLatInicial = [-3, 40]
             const zoom_p = IDEE.config.MAP_VIEWER_ZOOM || zoomInicial;
@@ -785,7 +794,82 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
 
         {changeImplString}
 
-        mapajs = mapa()
+        mapajs_0 = mapa()
+
+        function updateConfigBaseLayer() {{
+            Base_IGNBaseTodo_TMS_2 = new IDEE.layer.TMS({{
+                url: 'https://tms-ign-base.idee.es/1.0.0/IGNBaseTodo/{{z}}/{{x}}/{{-y}}.jpeg',
+                legend: 'IGNBaseTodo_2',
+                visible: true,
+                isBase: true,
+                tileGridMaxZoom: 17,
+                name: 'IGNBaseTodo_2',
+                attribution: '<p><b>Mapa base</b>: <a style="color: #0000FF" href="https://www.scne.es" target="_blank">SCNE</a></p>',
+            }}, {{
+                crossOrigin: 'anonymous',
+                displayInLayerSwitcher: false,
+            }})
+
+            IDEE.addQuickLayers({{
+                Base_IGNBaseTodo_TMS_2: Base_IGNBaseTodo_TMS_2
+            }})
+
+            tms_2 = {{
+                "base": "QUICK*Base_IGNBaseTodo_TMS_2"
+            }}
+
+            IDEE.config("tms", tms_2)
+            IDEE.config.backgroundlayers = [
+                {{
+                "id": "mapa",
+                "title": "Callejero",
+                "layers": [
+                    "QUICK*Base_IGNBaseTodo_TMS_2"
+                ]
+                }},
+                {{
+                "id": "imagen",
+                "title": "Imagen",
+                "layers": [
+                    "QUICK*BASE_PNOA_MA_TMS"
+                ]
+                }}
+            ]
+
+            IDEE.proxy(false);
+
+            return
+            }}
+
+            function _onRenderComplete() {{
+                const impl = mapajs_0.getMapImpl();
+                const capa = mapajs.getLayers().filter(layer => layer.name == "capa_gjson")[0];
+                if (!capa) return;
+                mapajs_0.setBbox(capa.getFeaturesExtent());
+                mapajs_0.setZoom(mapajs_0.getZoom() - 0.5);
+
+                if (impl && typeof impl.un === 'function') {{
+                    impl.un('rendercomplete', _onRenderComplete);
+                    return;
+                }}
+                if (impl && typeof impl.off === 'function') {{
+                    impl.off('rendercomplete', _onRenderComplete);
+                    return;
+                }}
+                if (impl && typeof impl.removeListener === 'function') {{
+                    impl.removeListener('rendercomplete', _onRenderComplete);
+                    return;
+                }}
+            }}
+
+            const _implForOn = mapajs_0.getMapImpl();
+            if (_implForOn && typeof _implForOn.on === 'function') {{
+            _implForOn.on('rendercomplete', _onRenderComplete);
+            }} else if (_implForOn && typeof _implForOn.addEventListener === 'function') {{
+            _implForOn.addEventListener('rendercomplete', _onRenderComplete);
+            }} else {{
+            console.warn('rendercomplete: no compatible add-listener method found on map impl');
+            }}
               
         """.format(
                     bbox = bbox,
