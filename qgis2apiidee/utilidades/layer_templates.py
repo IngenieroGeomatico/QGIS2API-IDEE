@@ -168,6 +168,14 @@ def to_local_geojson(layer, apiideeStyle):
             js_{name}.src = ".{sourceFolder}/{file}";
             document.head.appendChild(js_{name});
             js_{name}.addEventListener('load', () => {{
+                
+                // TODO: ver si esto funciona
+                const exists = (mapajs.getOverlayLayers() || []).some(l => {{
+                    try {{
+                        return l && (l.name === '{name}' || l.legend === '{name}');
+                    }}catch (e) {{ return false; }}
+                }});
+                if (exists) return;
 
                 {stylesList}
 
@@ -350,9 +358,28 @@ def save_vector_layer_as_geojson(layer, name):
     if e == QgsVectorFileWriter.NoError:
         with open(path, mode="w", encoding="utf8") as f:
             f.write(f"var {name} = ")
-            with open(path + '_tmp', encoding="utf8") as tmpFile:
-                for line in tmpFile:
-                    f.write(line.strip("\n\t "))
+            # Load the temporary GeoJSON, remove top-level 'crs' if present,
+            # then write a compact JSON representation into the final file.
+            try:
+                with open(path + '_tmp', encoding="utf8") as tmpFile:
+                    geo = json.load(tmpFile)
+                if isinstance(geo, dict) and 'crs' in geo:
+                    geo.pop('crs', None)
+                f.write(json.dumps(geo, ensure_ascii=False))
+            except Exception:
+                # Fallback: if parsing failed, copy file content but try to
+                # remove a "crs": {...} occurrence using regex.
+                try:
+                    with open(path + '_tmp', encoding="utf8") as tmpFile:
+                        text = tmpFile.read()
+                    # remove "crs": { ... }, allowing for trailing comma
+                    text = re.sub(r'"crs"\s*:\s*\{[^}]*\}\s*,?', '', text, flags=re.IGNORECASE|re.DOTALL)
+                    f.write(text)
+                except Exception:
+                    # As a last resort, attempt to copy raw lines
+                    with open(path + '_tmp', encoding="utf8") as tmpFile:
+                        for line in tmpFile:
+                            f.write(line.strip("\n\t "))
         try:
             os.remove(path + '_tmp')
         except Exception:
@@ -402,15 +429,19 @@ def _layer_tms(url, name, layer):
 
 def _layer_geotiff(url, name, layer):
     return f"""
-            mapajs.addGeoTIFF(
+            try {{
+                mapajs.addGeoTIFF(
                 new IDEE.layer.GeoTIFF({{
-                    url: '{url}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
+                        url: '{url}',
+                        name: '{name}',
+                        visibility: {str(layer['visible']).lower()},
+                        legend: '{name}',
+                    }})
+                );
+                mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
+            }} catch (error) {{
+                console.error(error);
+            }}
         """
 
 
@@ -558,15 +589,19 @@ def _layer_mvt(url, name, layer,apiideeStyle):
 
 def _layer_maplibre(url, name, layer):
     return f"""
-            mapajs.addMapLibre(
-                new IDEE.layer.MapLibre({{
-                    url: '{url}',
-                    name: '{name}',
-                    visibility: {str(layer['visible']).lower()},
-                    legend: '{name}',
-                }})
-            );
-            mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
+            try {{
+                mapajs.addMapLibre(
+                    new IDEE.layer.MapLibre({{
+                        url: '{url}',
+                        name: '{name}',
+                        visibility: {str(layer['visible']).lower()},
+                        legend: '{name}',
+                    }})
+                );
+                mapajs.getLayers().filter((layer) => layer.legend == "{name}")[0].setZIndex({layer['zIndex']})
+            }} catch (error) {{
+                console.error(error);
+            }}
         """
 
 

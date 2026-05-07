@@ -728,7 +728,6 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                     )
         return JS
     
-    #TODO: añadir mejoras de la reeeeefactorización de los plugin de capa base y selector de capa
     #TODO: cuando todo funcione, refactorizar para mejorar código duplicado
     def CreateJS_3D_2D(self, bbox, layers, controls, plugins):
 
