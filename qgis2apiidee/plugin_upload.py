@@ -7,8 +7,16 @@
 
 import sys
 import getpass
-import xmlrpc.client
 from optparse import OptionParser
+
+try:
+    from defusedxml import xmlrpc as defused_xmlrpc
+    defused_xmlrpc.monkey_patch()
+except Exception:
+    # defusedxml not available; continue without monkey-patch
+    pass
+
+import xmlrpc.client
 
 standard_library.install_aliases()
 

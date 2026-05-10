@@ -327,7 +327,9 @@ def QGISStyle2apiideeStyle(qgisLayerLegend):
             stroke_rgb, stroke_opacity = _parse_color(props, keys=('outline_color','line_color'))
             stroke_width = float(props.get('outline_width', 2))
 
-            var_hash = hashlib.sha1(f"{legend_attr}:{val}".encode()).hexdigest()[:8]
+            # Use a secure, non-cryptographically-weak hash for identifiers.
+            # blake2b with digest_size=4 produces 4 bytes -> 8 hex chars.
+            var_hash = hashlib.blake2b(f"{legend_attr}:{val}".encode(), digest_size=4).hexdigest()
             var_name = f"style_{var_hash}"
             prelude_parts.append(f"var {var_name} = {_make_generic_js(fill_rgb, fill_opacity, stroke_rgb, stroke_opacity, stroke_width)};")
             mapping_entries.append(f"{json.dumps(str(val))}: {var_name}")
