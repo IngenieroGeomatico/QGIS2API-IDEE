@@ -6,7 +6,7 @@
 name=QGIS2API-IDEE
 qgisMinimumVersion=3.0
 description=Complemento que crea un visualizador cartográfico con el contenido del lienzo de QGIS
-version=0.9
+version=0.10
 author=IngenieroGeomatico
 email=aurearagon@gmail.com
 

@@ -1,4 +1,22 @@
+=== nuevos desarrollos para v0.10 ===
+
+- Se refactoriza el código
+- Se añade pestaña para exportación de visualizadores en 3D
+
+=== nuevos desarrollos para v0.9 ===
+
+- Se solucionan errores y se modifica el icono
+
+
+=== nuevos desarrollos para v0.8 ===
+
+- Se realiza una refactorización de código
+- Se añade pestaña para realizar exportaciones en 3D
+- Se mejora la parte visual de la interfaz
+
+
 === nuevos desarrollos para v0.7 ===
+
 - Se arregla el parámetro TileMatrixSet en servicios WMTS
 - Se arregla aplicar estilos categoricos en geojson no locales y servicios
 - Se añaden Geotiff

@@ -222,7 +222,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                         modeSelectLayers: 'eyes',
                         isMoveLayers: true,
                         tools: ['transparency', 'legend', 'zoom', 'information', 'style', 'delete']
-                    }});
+                    });
                 mapajs.addPlugin(mp_selectorCapa);
             """
             pluginImports.append(headerImports)
@@ -711,7 +711,7 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                 container: 'mapaJS_div',
                 controls: {controls},
                 bbox: {bbox}
-            }}});
+            }});
             
             const layers_p = IDEE.config.MAP_VIEWER_LAYERS || [];
             mapajs.addLayers(layers_p)
@@ -895,7 +895,9 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                 .m-areas>div.m-area>div.m-panel.collapsed>button.m-panel-btn,
                 .ol-zoomslider>button.ol-zoomslider-thumb,
                 .m-areas>div.m-area>div.m-panel.no-collapsible>div.m-panel-controls>div.m-control.m-container.m-background>button,
-                .m-scale-container {
+                .m-scale-container,
+                #m-rotate-slider-container,
+                .m-areas > div.m-area > div.m-panel > div.m-panel-controls > div.m-control.m-rotate-container button[class^="g-cartografia-"]#m-rotate-button {
                     background-color: orange !important;
                 }
 
@@ -913,7 +915,6 @@ class QGIS2APIIDEEDialog(QtWidgets.QDialog, FORM_CLASS):
                     background: white !important;
                 }
   
-
                 .m-panel section button {
                     background-color: transparent !important;
                 }
