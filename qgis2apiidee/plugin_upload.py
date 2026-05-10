@@ -9,14 +9,20 @@ import sys
 import getpass
 from optparse import OptionParser
 
+# Prefer the safe defusedxml xmlrpc client implementation when available.
+xmlrpc_client = None
 try:
-    from defusedxml import xmlrpc as defused_xmlrpc
-    defused_xmlrpc.monkey_patch()
+    import defusedxml.xmlrpc.client as xmlrpc_client
 except Exception:
-    # defusedxml not available; continue without monkey-patch
-    pass
-
-import xmlrpc.client
+    try:
+        # Try to monkey-patch the stdlib xmlrpc with defusedxml as a fallback.
+        from defusedxml import xmlrpc as defused_xmlrpc
+        defused_xmlrpc.monkey_patch()
+    except Exception:
+        # defusedxml not available; will use stdlib xmlrpc.client below.
+        pass
+    import importlib
+    xmlrpc_client = importlib.import_module('xmlrpc.client')
 
 standard_library.install_aliases()
 
@@ -43,21 +49,21 @@ def main(parameters, arguments):
         endpoint=ENDPOINT)
     print("Connecting to: %s" % hide_password(address))
 
-    server = xmlrpc.client.ServerProxy(address, verbose=VERBOSE)
+    server = xmlrpc_client.ServerProxy(address, verbose=VERBOSE)
 
     try:
         with open(arguments[0], 'rb') as handle:
             plugin_id, version_id = server.plugin.upload(
-                xmlrpc.client.Binary(handle.read()))
+                xmlrpc_client.Binary(handle.read()))
         print("Plugin ID: %s" % plugin_id)
         print("Version ID: %s" % version_id)
-    except xmlrpc.client.ProtocolError as err:
+    except xmlrpc_client.ProtocolError as err:
         print("A protocol error occurred")
         print("URL: %s" % hide_password(err.url, 0))
         print("HTTP/HTTPS headers: %s" % err.headers)
         print("Error code: %d" % err.errcode)
         print("Error message: %s" % err.errmsg)
-    except xmlrpc.client.Fault as err:
+    except xmlrpc_client.Fault as err:
         print("A fault occurred")
         print("Fault code: %d" % err.faultCode)
         print("Fault string: %s" % err.faultString)
